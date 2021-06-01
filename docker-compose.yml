@@ -1,0 +1,22 @@
+version: "2.4"
+
+services:
+  mongo:
+    image: mongo:4.0-xenial
+    volumes:
+      - data:/data/db
+  flask:
+    build: ./server
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+  react:
+    build: ./client
+    ports:
+      - "3000:3000"
+    depends_on:
+      - flask
+
+volumes:
+  data:

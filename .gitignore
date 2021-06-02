@@ -7,4 +7,5 @@ client/yarn.lock
 
 # SERVER
 server/env
-
+server/config/dev.py
+node_modules

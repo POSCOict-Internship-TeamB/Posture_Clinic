@@ -3,20 +3,53 @@ version: "2.4"
 services:
   mongo:
     image: mongo:4.0-xenial
+    networks:
+      - app-tier
     volumes:
       - data:/data/db
+
   flask:
     build: ./server
     ports:
       - "5000:5000"
+    networks:
+      - app-tier
+    restart: always
+    command: gunicorn -w 1 -b 0.0.0.0:5000 server:app
     depends_on:
       - mongo
+
   react:
     build: ./client
     ports:
       - "3000:3000"
+    stdin_open: true
+    tty: true
+    networks:
+      - app-tier
+    restart: always
+    environment:
+      - CHOKIDAR_USEPOLLING=TRUE
     depends_on:
       - flask
 
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "8000:8000"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - react
+      - flask
+    networks:
+      - app-tier
+    restart: "on-failure"
+
 volumes:
   data:
+
+networks:
+  app-tier:
+    driver: bridge

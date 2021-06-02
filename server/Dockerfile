@@ -1,4 +1,5 @@
 FROM python:3.6-alpine
+# FROM ubuntu:20.04
 
 WORKDIR /server
 

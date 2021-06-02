@@ -11,7 +11,12 @@ function App() {
       }
     });
   }, []);
-  return <div>{message}</div>;
+  return (
+    <div>
+      {message}
+      <div>g2gdddddddddddd2</div>
+    </div>
+  );
 }
 
 export default App;

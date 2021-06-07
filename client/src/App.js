@@ -1,23 +1,30 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import "./App.css";
+import { Spin } from "antd";
+import React, { Suspense } from "react";
+import { Route, Switch } from "react-router-dom";
+import Auth from "./hoc/auth";
+import styled from "@emotion/styled";
+import SiderLayout from "./components/Layout/SiderLayout";
+
+import Dashboard from "./pages/Dashboard/Dashboard";
+import Posture from "./pages/Posture/Posture";
+import Login from "./pages/Login/Login";
+
+const Container = styled.div`
+  display: flex;
+`;
 
 function App() {
-  const [message, setMessage] = useState("");
-  useEffect(() => {
-    axios.get("http://localhost:5000/api").then((response) => {
-      if (response.data) {
-        setMessage(response.data.message);
-      }
-    });
-  }, []);
   return (
-    <div>
-      {message}
-      <div>
-        g2gdddddddddddd2<b>ddfs</b>
-      </div>
-    </div>
+    <Suspense fallback={<Spin size="large" />}>
+      <Container>
+        <SiderLayout />
+        <Switch>
+          <Route exact path="/" component={Auth(Login, false)} />
+          <Route exact path="/posture" component={Auth(Posture, false)} />
+          <Route exact path="/dashboard" component={Auth(Dashboard, false)} />
+        </Switch>
+      </Container>
+    </Suspense>
   );
 }
 

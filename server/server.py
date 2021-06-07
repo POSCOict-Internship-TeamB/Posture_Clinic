@@ -1,5 +1,5 @@
 from flask import Flask, jsonify
-from flask_cors import cross_origin, CORS
+# from flask_cors import cross_origin
 from pymongo import MongoClient
 from datetime import datetime
 
@@ -12,8 +12,8 @@ db = client.get_database('test')
 
 
 @app.route('/api', methods=['GET'])
-@cross_origin()
-def root():
+# @cross_origin()
+def root(): 
     db.hits.insert_one({'time': datetime.utcnow()})
     response = jsonify(
         message='This page has been visited {} times.'.format(db.hits.count()))

@@ -1,7 +1,6 @@
 import React, { useState, useRef, useCallback } from "react";
 import BaseContainer from "components/BaseComponents";
 import Webcam from "react-webcam";
-// react-webcam 설치해서 사진캡쳐 기능
 
 function Posture() {
   const webcamRef = useRef(null);
@@ -17,8 +16,27 @@ function Posture() {
 
   const capture = useCallback(() => {
     const capturedImg = webcamRef.current.getScreenshot();
+    const data = new FormData();
+    const image = dataURItoBlob(capturedImg);
+
+    data.append("image", image, "posture.png");
+    console.log(data.get("image"));
+
     setImgSrc(capturedImg);
   }, [webcamRef, setImgSrc]);
+
+  const dataURItoBlob = (dataURI) => {
+    let byteString = atob(dataURI.split(",")[1]);
+    let mimeString = dataURI.split(",")[0].split(":")[1].split(";")[0];
+
+    let ab = new ArrayBuffer(byteString.length);
+    let ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+
+    return new Blob([ab], { type: mimeString });
+  };
 
   return (
     <BaseContainer>

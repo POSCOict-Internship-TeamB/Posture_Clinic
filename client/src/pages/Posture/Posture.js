@@ -1,6 +1,8 @@
 import React, { useState, useRef, useCallback } from "react";
 import BaseContainer from "components/BaseComponents";
 import Webcam from "react-webcam";
+import { Button } from "antd";
+import axios from "axios";
 
 function Posture() {
   const webcamRef = useRef(null);
@@ -17,12 +19,22 @@ function Posture() {
   const capture = useCallback(() => {
     const capturedImg = webcamRef.current.getScreenshot();
     const data = new FormData();
-    const image = dataURItoBlob(capturedImg);
+    const file = dataURItoBlob(capturedImg);
 
-    data.append("image", image, "posture.png");
-    console.log(data.get("image"));
+    data.append("file", file, "posture.png");
+    console.log(data.get("file"));
 
     setImgSrc(capturedImg);
+    
+    let variable = {
+      data: data,
+    };
+
+    axios
+      .post("http://localhost:5000/api/postureImage", variable)
+      .then((response) => {
+        console.log(response.data);
+      });
   }, [webcamRef, setImgSrc]);
 
   const dataURItoBlob = (dataURI) => {
@@ -38,6 +50,12 @@ function Posture() {
     return new Blob([ab], { type: mimeString });
   };
 
+  const onButtonClick = () => {
+    axios.get("http://localhost:5000/api/posture").then((response) => {
+      console.log(response.data);
+    });
+  };
+
   return (
     <BaseContainer>
       <Webcam
@@ -48,6 +66,9 @@ function Posture() {
       />
       <button onClick={capture}>Capture photo</button>
       {imgSrc && <img src={imgSrc} alt="img" />}
+      <Button type="primary" onClick={onButtonClick}>
+        각도 불러오기
+      </Button>
     </BaseContainer>
   );
 }

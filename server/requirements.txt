@@ -4,3 +4,6 @@ pymongo==3.11.0
 Flask-PyMongo==2.3.0
 dnspython
 gunicorn>=20.0.4
+numpy
+requests
+# matplotlib

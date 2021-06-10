@@ -12,7 +12,7 @@ function Login() {
   // }, []);
   return (
     <BaseContainer>
-      dddddddddddddddddddddddddddddddddddddddddddddd
+      LoginPage
     </BaseContainer>
   );
 }

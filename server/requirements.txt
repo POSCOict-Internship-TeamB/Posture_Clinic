@@ -6,4 +6,5 @@ dnspython
 gunicorn>=20.0.4
 numpy
 requests
+python-dotenv
 # matplotlib

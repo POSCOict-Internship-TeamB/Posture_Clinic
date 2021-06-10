@@ -14,29 +14,6 @@ function Posture() {
     facingMode: "user",
   };
 
-  console.log(imgSrc);
-
-  const capture = useCallback(() => {
-    const capturedImg = webcamRef.current.getScreenshot();
-    const data = new FormData();
-    const file = dataURItoBlob(capturedImg);
-
-    data.append("file", file, "posture.png");
-    console.log(data.get("file"));
-
-    setImgSrc(capturedImg);
-    
-    let variable = {
-      data: data,
-    };
-
-    axios
-      .post("http://localhost:5000/api/postureImage", variable)
-      .then((response) => {
-        console.log(response.data);
-      });
-  }, [webcamRef, setImgSrc]);
-
   const dataURItoBlob = (dataURI) => {
     let byteString = atob(dataURI.split(",")[1]);
     let mimeString = dataURI.split(",")[0].split(":")[1].split(";")[0];
@@ -49,6 +26,32 @@ function Posture() {
 
     return new Blob([ab], { type: mimeString });
   };
+
+  const capture = useCallback(() => {
+    const capturedImg = webcamRef.current.getScreenshot();
+    const data = new FormData();
+    const file = dataURItoBlob(capturedImg);
+    data.append("file", file, "posture.png");
+    console.log(data.get('file'));
+    setImgSrc(capturedImg);
+    let variable = {
+      body: data,
+    };
+
+    axios
+      .post(
+        "http://localhost:5000/api/postureImage",
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+        variable
+      )
+      .then((response) => {
+        console.log(response);
+      });
+  }, [webcamRef, setImgSrc]);
 
   const onButtonClick = () => {
     axios.get("http://localhost:5000/api/posture").then((response) => {

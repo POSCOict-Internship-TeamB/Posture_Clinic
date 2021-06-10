@@ -7,15 +7,24 @@ import requests
 import math
 import urllib
 from requests import Session
+import os
+from dotenv import load_dotenv
+from werkzeug.utils import secure_filename	
+
 # import matplotlib.pyplot as plt
 # import matplotlib.patches as patches
 
 
 app = Flask(__name__)
 CORS(app)
+app.config['UPLOAD_FOLDER'] = './uploads'
 
-client = MongoClient(
-    "mongodb+srv://admin:1234@poscoict-internship-tea.pjwph.mongodb.net/test?authSource=admin&replicaSet=atlas-x4q3t7-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true")
+load_dotenv()
+MONGO_URI = os.getenv("MONGO_URI")
+KAKAO_APP_KEY = os.getenv("KAKAO_APP_KEY")
+KAKAO_URL = os.getenv("KAKAO_URL")
+
+client = MongoClient(MONGO_URI)
 db = client.get_database('test')
 
 
@@ -30,19 +39,16 @@ def root():
 
 @app.route('/api/posture', methods=['GET'])
 def get_angle():
-    app_key = 'KakaoAK c74e0212de19b5331ac4878b860f71a9'
-
-    url = 'https://cv-api.kakaobrain.com/pose'
 
     data = {
         'image_url': 'https://funshop.akamaized.net/products/0000071720/20190725_01_02.jpg?00000001564039634'
     }
 
     headers = {
-        'Authorization': app_key
+        'Authorization': KAKAO_APP_KEY
     }
 
-    res = requests.post(url, data=data, headers=headers).json()
+    res = requests.post(KAKAO_URL, data=data, headers=headers).json()
 
     keypoints = np.array(res[0]['keypoints']).reshape((-1, 3))
 
@@ -69,17 +75,24 @@ def get_angle():
 
 @app.route('/api/postureImage', methods=['POST'])
 def get_image():
-    app_key = 'c74e0212de19b5331ac4878b860f71a9'
-    print(request.files['data'])
-    image_file = request.files['data']
-    session = requests.Session()
-    session.headers.update({'Authorization': 'KakaoAK' + app_key})
+    params = request.files['file']
+    image_file = request.files['file']
 
-    with open(image_file, 'rb') as f:
-        response = session.post(
-            'https://cv-api.kakaobrain.com/pose', files={'file', f})
-        print(response.status_code, response.json())
-        return response
+    print("Posted file: {}".format(request.files['file']))
+
+    # session = requests.Session()
+    # session.headers.update({'Authorization': KAKAO_APP_KEY})
+
+    # with open(image_file, 'rb') as f:
+    #     response = session.post(
+    #         KAKAO_URL, files=[('file', f)])
+    #     print(response.status_code, response.json())
+    #     return response
+
+
+
+
+
 
 
 """

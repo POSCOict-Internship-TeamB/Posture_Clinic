@@ -43,7 +43,7 @@ function SiderLayout() {
 
   return (
     <div>
-      <Layout style={{ minHeight: "100vh" }}>
+      <Layout style={{ minHeight: "100%" }}>
         <Sider
           collapsible
           collapsed={collapsed}

@@ -1,7 +1,7 @@
 import { Spin } from "antd";
 import React, { Suspense } from "react";
 import { Route, Switch } from "react-router-dom";
-import Auth from "./hoc/auth";
+// import Auth from "./hoc/auth";
 import styled from "@emotion/styled";
 import SiderLayout from "./components/Layout/SiderLayout";
 
@@ -19,9 +19,9 @@ function App() {
       <Container>
         <SiderLayout />
         <Switch>
-          <Route exact path="/" component={Auth(Login, false)} />
-          <Route exact path="/posture" component={Auth(Posture, false)} />
-          <Route exact path="/dashboard" component={Auth(Dashboard, false)} />
+          <Route exact path="/" component={Login} />
+          <Route exact path="/posture" component={Posture} />
+          <Route exact path="/dashboard" component={Dashboard} />
         </Switch>
       </Container>
     </Suspense>

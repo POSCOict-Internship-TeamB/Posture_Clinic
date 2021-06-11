@@ -2,22 +2,23 @@ from flask import Flask, jsonify, request
 from flask_cors import cross_origin, CORS
 from pymongo import MongoClient
 from datetime import datetime
-import numpy as np
 import requests
 import math
-import urllib
 from requests import Session
 import os
 from dotenv import load_dotenv
-from werkzeug.utils import secure_filename	
+from werkzeug.utils import secure_filename
 
-# import matplotlib.pyplot as plt
-# import matplotlib.patches as patches
+import numpy as np
 
+
+from measure import measure_angle_url, measure_angle_file
 
 app = Flask(__name__)
 CORS(app)
 app.config['UPLOAD_FOLDER'] = './uploads'
+
+IMAGE_FILE_PATH = './uploads/123123123.png'
 
 load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI")
@@ -37,75 +38,44 @@ def root():
     return response
 
 
-@app.route('/api/posture', methods=['GET'])
+@app.route('/api/posture-url', methods=['GET'])
 def get_angle():
 
     data = {
-        'image_url': 'https://funshop.akamaized.net/products/0000071720/20190725_01_02.jpg?00000001564039634'
+        'image_url': 'http://ncc.phinf.naver.net/20141017_225/1413512182571B2Vuy_JPEG'
+        # 예시1) https://www.sisajournal.com/news/photo/201906/187672_92169_1529.jpg
+        # 예시2) http://ncc.phinf.naver.net/20141017_225/1413512182571B2Vuy_JPEG
+        # 예시3) https://previews.123rf.com/images/endomedion/endomedion1411/endomedion141100016/33515699-%EC%98%AC%EB%B0%94%EB%A5%B8-%EC%95%89%EC%9D%80-%EC%9E%90%EC%84%B8%EC%97%90%EC%84%9C-%EC%9D%98%EC%9E%90%EC%97%90-%EB%B9%84%EC%A6%88%EB%8B%88%EC%8A%A4-%EB%82%A8%EC%9E%90-%ED%9C%B4%EC%8B%9D.jpg
     }
 
     headers = {
         'Authorization': KAKAO_APP_KEY
     }
 
-    res = requests.post(KAKAO_URL, data=data, headers=headers).json()
+    response = requests.post(KAKAO_URL, data=data, headers=headers).json()
+    # 각도산출
+    angle, message = measure_angle_url(response, data['image_url'])
 
-    keypoints = np.array(res[0]['keypoints']).reshape((-1, 3))
-
-    # scientific notation(과학적 표기법(너무 크거나 작은 숫자들을 십진법으로 표현하는 방법)) 제거
-    np.set_printoptions(suppress=True)
-
-    x = np.array([keypoints[6][0], keypoints[6][1]])
-    y = np.array([keypoints[12][0], keypoints[12][1]])
-    z = np.array([keypoints[14][0], keypoints[14][1]])
-
-    if(y[1] < z[1]):          # 무릎이 지면과 수평이 아닐 때
-        # 어깨-엉덩이 벡터와 y = (엉덩이의 y좌표 값)벡터의 각도
-        radian = np.arctan2(x[1] - y[1], x[0] - y[0])
-    else:
-        # 어깨-엉덩이 벡터와 엉덩이-무릎 벡터의 각도
-        radian = np.arctan2(z[1] - y[1], z[0] - y[0]) - \
-            np.arctan2(x[1] - y[1], x[0] - y[0])
-
-    # 각도를 절대값으로 바꾸고 소수점 첫째자리에서 반올림
-    angle = round(np.abs(radian*180.0/np.pi), 0)
-
-    return jsonify({'angle': angle, "res": res})
+    return jsonify({'angle': angle,  "message": message})
 
 
-@app.route('/api/postureImage', methods=['POST'])
+@app.route('/api/posture-file', methods=['POST'])
 def get_image():
-    params = request.files['file']
     image_file = request.files['file']
+    filename = secure_filename(image_file.filename)
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    image_file.save(filepath)
 
-    print("Posted file: {}".format(request.files['file']))
+    session = requests.Session()
+    session.headers.update({'Authorization': KAKAO_APP_KEY})
 
-    # session = requests.Session()
-    # session.headers.update({'Authorization': KAKAO_APP_KEY})
+    # IMAGE_FILE_PATH 를 filepath로 바꾸면 웹캠을 통해 캡쳐한 이미지 분석
+    with open(filepath, 'rb') as f:
+        response = session.post(KAKAO_URL, files=[('file', f)]).json()
 
-    # with open(image_file, 'rb') as f:
-    #     response = session.post(
-    #         KAKAO_URL, files=[('file', f)])
-    #     print(response.status_code, response.json())
-    #     return response
+        angle, message = measure_angle_file(response)
 
-
-
-
-
-
-
-"""
-파일로 읽어오는 코드
-app_key = 'c74e0212de19b5331ac4878b860f71a9'
-image_file = 'body.jpg'
-session = requests.Session()
-session.headers.update({'Authorization': 'KakaoAK' + app_key})
-
-with open(image_file, 'rb') as f:
-    response = session.post('https://cv-api.kakaobrain.com/pose', files = [('file', f)])
-    print(response.status_code, response.json())
-"""
+        return jsonify({'angle': angle, 'message': message})
 
 
 if __name__ == '__main__':

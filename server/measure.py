@@ -1,4 +1,3 @@
-
 from flask import request
 import numpy as np
 import urllib
@@ -11,7 +10,7 @@ def measure_angle_url(response, image_url):
     # 랜드마크 좌표를 배열 형식으로 정리([x, y, 신뢰도]순서)
     keypoints = np.array(response[0]['keypoints']).reshape((-1, 3))
 
-    # scientific notation(과학적 표기법(너무 크거나 작은 숫자들을 십진법으로 표현하는 방법)) 제거
+    # scientific notation(과학적 표기법) 제거
     np.set_printoptions(suppress=True)
 
     # x - 오른쪽 어께 y - 오른쪽 골반 z - 오른쪽 무릎 각각의 x, y좌표로 배열 생성
@@ -80,13 +79,13 @@ def measure_angle_url(response, image_url):
     ax.imshow(img)
     # 축 숨기기
     plt.axis('off')
-    # body.png로 저장
-    plt.savefig('./uploads/body.png')
+    # landmark.png로 저장
+    plt.savefig('./uploads/landmark.png')
 
     return posture_angle, message
 
 
-def measure_angle_file(response):
+def measure_angle_file(response, filepath):
 
     # 랜드마크 좌표를 배열 형식으로 정리([x, y, 신뢰도]순서)
     keypoints = np.array(response[0]['keypoints']).reshape((-1, 3))
@@ -128,39 +127,39 @@ def measure_angle_file(response):
     else:
         message = "앞으로 기울었습니다."
 
-    # fig, ax = plt.subplots(figsize=(20, 20))
+    fig, ax = plt.subplots(figsize=(20, 20))
 
-    # f = urllib.request.urlopen(image_url)
-    # img = plt.imread(f, format='jpg | png | jpeg')
+    f = filepath
+    img = plt.imread(f, format='jpg | png | jpeg')
 
-    # x, y, w, h = response[0]['bbox']
+    x, y, w, h = response[0]['bbox']
 
-    # # 랜드마크 주변에 사각형 그리기
-    # rect = patches.Rectangle((x, y), w, h, linewidth=2,
-    #                          edgecolor='r', facecolor='none')
-    # ax.add_patch(rect)
+    # 랜드마크 주변에 사각형 그리기
+    rect = patches.Rectangle((x, y), w, h, linewidth=2,
+                             edgecolor='r', facecolor='none')
+    ax.add_patch(rect)
 
-    # # 이을 랜드마크끼리 묶기
-    # skeleton = [
-    #     # [5, 7, 9], # 왼팔
-    #     # [6, 8, 10], # 오른팔
-    #     [11, 13, 15],  # 왼쪽 골반-무릎-발목
-    #     [12, 14, 16],  # 오른쪽 골반-무릎-발목
-    #     [5, 6, 12, 11, 5],  # 몸통
-    #     [5, 3],  # 왼쪽 어께-왼쪽 귀
-    #     [6, 4]  # 오른쪽 어께-오른쪽 귀
-    # ]
+    # 이을 랜드마크끼리 묶기
+    skeleton = [
+        # [5, 7, 9], # 왼팔
+        # [6, 8, 10], # 오른팔
+        [11, 13, 15],  # 왼쪽 골반-무릎-발목
+        [12, 14, 16],  # 오른쪽 골반-무릎-발목
+        [5, 6, 12, 11, 5],  # 몸통
+        [5, 3],  # 왼쪽 어께-왼쪽 귀
+        [6, 4]  # 오른쪽 어께-오른쪽 귀
+    ]
 
-    # # 랜드마크에 점 찍고 선으로 잇기
-    # for sk in skeleton:
-    #     coords = np.take(keypoints, sk, axis=0)
-    #     ax.plot(coords[:, 0], coords[:, 1],
-    #             marker='o', linewidth=3, markersize=10)
+    # 랜드마크에 점 찍고 선으로 잇기
+    for sk in skeleton:
+        coords = np.take(keypoints, sk, axis=0)
+        ax.plot(coords[:, 0], coords[:, 1],
+                marker='o', linewidth=3, markersize=10)
 
-    # ax.imshow(img)
-    # # 축 숨기기
-    # plt.axis('off')
-    # # body.png로 저장
-    # plt.savefig('./uploads/body.png')
+    ax.imshow(img)
+    # 축 숨기기
+    plt.axis('off')
+    # landmark.png로 저장
+    plt.savefig('./uploads/landmark.png')
 
     return posture_angle, message

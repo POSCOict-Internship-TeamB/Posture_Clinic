@@ -8,23 +8,22 @@ from requests import Session
 import os
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
-
 import numpy as np
 
-
+from image import get_image_path
 from measure import measure_angle_url, measure_angle_file
 
 app = Flask(__name__)
 CORS(app)
 app.config['UPLOAD_FOLDER'] = './uploads'
 
-IMAGE_FILE_PATH = './uploads/123123123.png'
-
+# 키값 호출
 load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI")
 KAKAO_APP_KEY = os.getenv("KAKAO_APP_KEY")
 KAKAO_URL = os.getenv("KAKAO_URL")
 
+# MONGO DB
 client = MongoClient(MONGO_URI)
 db = client.get_database('test')
 
@@ -69,13 +68,14 @@ def get_image():
     session = requests.Session()
     session.headers.update({'Authorization': KAKAO_APP_KEY})
 
-    # IMAGE_FILE_PATH 를 filepath로 바꾸면 웹캠을 통해 캡쳐한 이미지 분석
     with open(filepath, 'rb') as f:
         response = session.post(KAKAO_URL, files=[('file', f)]).json()
 
-        angle, message = measure_angle_file(response)
+        angle, message = measure_angle_file(response, filepath)
 
-        return jsonify({'angle': angle, 'message': message})
+        image_path = get_image_path('./uploads/landmark.png')
+
+        return jsonify({'angle': angle, 'message': message, 'image_path': image_path})
 
 
 if __name__ == '__main__':

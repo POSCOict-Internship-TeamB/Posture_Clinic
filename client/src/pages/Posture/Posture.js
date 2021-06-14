@@ -5,6 +5,11 @@ import { Button } from "antd";
 import axios from "axios";
 import styled from "@emotion/styled";
 
+const Img = styled.img`
+  width: 622px;
+  height: 350px;
+`;
+
 const Wrapper = styled.div`
   display: flex;
   justify-content: center;
@@ -20,13 +25,11 @@ function Posture() {
 
   const [fileAngle, setFileAngle] = useState("");
   const [fileMessage, setFileMessage] = useState("");
-
-  const [urlAngle, setUrlAngle] = useState("");
-  const [urlMessage, setUrlMessage] = useState("");
+  const [landmarkImage, setLandmarkImage] = useState("");
 
   const videoConstraints = {
-    width: "570",
-    height: "320",
+    width: "622",
+    height: "350",
     facingMode: "user",
   };
 
@@ -45,10 +48,10 @@ function Posture() {
 
   const capture = useCallback(() => {
     const capturedImg = webcamRef.current.getScreenshot();
+    console.log(capturedImg);
     const data = new FormData();
     const file = dataURItoBlob(capturedImg);
     data.append("file", file, "posture.png");
-    console.log(data.get("file"));
     setImgSrc(capturedImg);
 
     axios
@@ -56,15 +59,17 @@ function Posture() {
       .then((response) => {
         setFileAngle(response.data.angle);
         setFileMessage(response.data.message);
+        setLandmarkImage(response.data.image_path);
+        console.log(response.data);
       });
   }, [webcamRef, setImgSrc]);
 
-  const onButtonClick = () => {
-    axios.get("http://localhost:5000/api/posture-url").then((response) => {
-      setUrlAngle(response.data.angle);
-      setUrlMessage(response.data.message);
-    });
-  };
+  // const onButtonClick = () => {
+  //   axios.get("http://localhost:5000/api/posture-url").then((response) => {
+  //     setUrlAngle(response.data.angle);
+  //     setUrlMessage(response.data.message);
+  //   });
+  // };
 
   return (
     <BaseContainer>
@@ -77,7 +82,7 @@ function Posture() {
             videoConstraints={videoConstraints}
           />
           <div style={{ marginLeft: "3rem" }}>
-            {imgSrc && <img src={imgSrc} alt="img" />}
+            {imgSrc && <Img src={imgSrc} alt="img" />}
           </div>
         </div>
       </Wrapper>
@@ -88,39 +93,14 @@ function Posture() {
       </Wrapper>
       {fileAngle && (
         <Wrapper>
+          <div>
+            {landmarkImage && (
+              <Img src={`data:image/jpeg;base64,${landmarkImage}`} alt="img" />
+            )}
+          </div>
           <h1 style={{ color: "red" }}>
             <b>
               허리와 무릎의 각도 : {fileAngle} &nbsp; {fileMessage}
-            </b>
-          </h1>
-        </Wrapper>
-      )}
-      <Wrapper>
-        <div style={{ display: "flex", margin: "2rem" }}>
-          <img
-            src="http://ncc.phinf.naver.net/20141017_225/1413512182571B2Vuy_JPEG"
-            alt="image"
-          />
-          <div style={{ marginLeft: "3rem" }}>
-            <img
-              src={process.env.PUBLIC_URL + '/body.png'}
-              alt="image"
-              width='450px'
-              height='600px'
-            />
-          </div>
-        </div>
-      </Wrapper>
-      <Wrapper>
-        <StyledButton type="primary" onClick={onButtonClick}>
-          URL로 자세 측정
-        </StyledButton>
-      </Wrapper>
-      {urlAngle && (
-        <Wrapper>
-          <h1 style={{ color: "red" }}>
-            <b>
-              허리와 무릎 간의 각도 : {urlAngle} &nbsp; {urlMessage}
             </b>
           </h1>
         </Wrapper>

@@ -10,12 +10,12 @@ import { Provider } from "react-redux";
 import { createStore, applyMiddleware } from "redux";
 import promiseMiddleware from "redux-promise";
 import ReduxThunk from "redux-thunk";
-
+import { logger } from "redux-logger";
 import App from "./App";
 
 const store = createStore(
   Reducer,
-  composeWithDevTools(applyMiddleware(ReduxThunk,  promiseMiddleware))
+  composeWithDevTools(applyMiddleware(ReduxThunk, logger, promiseMiddleware))
 );
 ReactDOM.render(
   <Provider store={store}>

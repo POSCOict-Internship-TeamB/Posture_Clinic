@@ -27,6 +27,8 @@ function Posture() {
   const [fileMessage, setFileMessage] = useState("");
   const [landmarkImage, setLandmarkImage] = useState("");
 
+  const [opencvImage, setOpencvImage] = useState("");
+
   const videoConstraints = {
     width: "622",
     height: "350",
@@ -64,12 +66,12 @@ function Posture() {
       });
   }, [webcamRef, setImgSrc]);
 
-  // const onButtonClick = () => {
-  //   axios.get("http://localhost:5000/api/posture-url").then((response) => {
-  //     setUrlAngle(response.data.angle);
-  //     setUrlMessage(response.data.message);
-  //   });
-  // };
+  const onButtonClick = () => {
+    axios.post("http://localhost:5000/api/posture-opencv").then((response) => {
+      console.log(response.data);
+      setOpencvImage(response.data.image_path);
+    });
+  };
 
   return (
     <BaseContainer>
@@ -90,6 +92,10 @@ function Posture() {
         <StyledButton type="primary" onClick={capture}>
           이미지 캡처하기
         </StyledButton>
+        <Button onClick={onButtonClick}>opencv!!</Button>
+        {opencvImage && (
+          <Img src={`data:image/jpeg;base64,${opencvImage}`} alt="img" />
+        )}
       </Wrapper>
       {fileAngle && (
         <Wrapper>

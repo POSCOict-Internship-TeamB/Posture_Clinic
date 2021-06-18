@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback } from "react";
 import BaseContainer from "components/BaseComponents";
 import Webcam from "react-webcam";
-import { Button } from "antd";
+import { Button, Spin } from "antd";
 import axios from "axios";
 import styled from "@emotion/styled";
 
@@ -13,21 +13,31 @@ const Img = styled.img`
 const Wrapper = styled.div`
   display: flex;
   justify-content: center;
+  flex-direction: column;
 `;
 
 const StyledButton = styled(Button)`
-  border-radius: 20px;
+  width: 150px;
+  height: 50px;
+  border-radius: 10px;
+  margin: 1rem auto;
+`;
+
+const StyledSpin = styled(Spin)`
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 `;
 
 function Posture() {
   const webcamRef = useRef(null);
+  const [loading, setLoading] = useState(false);
   const [imgSrc, setImgSrc] = useState(null);
-
-  const [fileAngle, setFileAngle] = useState("");
-  const [fileMessage, setFileMessage] = useState("");
-  const [landmarkImage, setLandmarkImage] = useState("");
-
-  const [opencvImage, setOpencvImage] = useState("");
+  const [angle, setAngle] = useState("");
+  const [message, setMessage] = useState("");
+  const [measuredImage, setMeasuredImage] = useState("");
 
   const videoConstraints = {
     width: "622",
@@ -49,6 +59,7 @@ function Posture() {
   };
 
   const capture = useCallback(() => {
+    setLoading(true);
     const capturedImg = webcamRef.current.getScreenshot();
     console.log(capturedImg);
     const data = new FormData();
@@ -56,60 +67,78 @@ function Posture() {
     data.append("file", file, "posture.png");
     setImgSrc(capturedImg);
 
-    axios
-      .post("http://localhost:5000/api/posture-file", data)
-      .then((response) => {
-        setFileAngle(response.data.angle);
-        setFileMessage(response.data.message);
-        setLandmarkImage(response.data.image_path);
-        console.log(response.data);
-      });
+    axios.post("http://localhost:5000/api/posture", data).then((response) => {
+      setLoading(false);
+      console.log(response.data);
+      setMeasuredImage(response.data.image_path);
+      setAngle(response.data.angle);
+      setMessage(response.data.message);
+    });
   }, [webcamRef, setImgSrc]);
 
-  const onButtonClick = () => {
-    axios.post("http://localhost:5000/api/posture-opencv").then((response) => {
-      console.log(response.data);
-      setOpencvImage(response.data.image_path);
-    });
+  const recapture = () => {
+    setImgSrc("");
+    setMeasuredImage("");
   };
 
   return (
     <BaseContainer>
-      <Wrapper>
-        <div style={{ display: "flex", margin: "2rem" }}>
-          <Webcam
-            audio={false}
-            ref={webcamRef}
-            screenshotFormat="image/jpeg"
-            videoConstraints={videoConstraints}
-          />
-          <div style={{ marginLeft: "3rem" }}>
-            {imgSrc && <Img src={imgSrc} alt="img" />}
-          </div>
-        </div>
-      </Wrapper>
-      <Wrapper>
-        <StyledButton type="primary" onClick={capture}>
-          이미지 캡처하기
-        </StyledButton>
-        <Button onClick={onButtonClick}>opencv!!</Button>
-        {opencvImage && (
-          <Img src={`data:image/jpeg;base64,${opencvImage}`} alt="img" />
-        )}
-      </Wrapper>
-      {fileAngle && (
-        <Wrapper>
-          <div>
-            {landmarkImage && (
-              <Img src={`data:image/jpeg;base64,${landmarkImage}`} alt="img" />
+      {loading ? (
+        <StyledSpin tip="Loading..." size="large" />
+      ) : (
+        <>
+          <Wrapper>
+            <div style={{ display: "flex", margin: "2rem" }}>
+              {imgSrc ? (
+                <Img src={imgSrc} alt="img" />
+              ) : (
+                <Wrapper>
+                  <Webcam
+                    audio={false}
+                    ref={webcamRef}
+                    screenshotFormat="image/jpeg"
+                    videoConstraints={videoConstraints}
+                  />
+                  <StyledButton type="primary" onClick={capture}>
+                    자세 측정하기
+                  </StyledButton>
+                </Wrapper>
+              )}
+            </div>
+          </Wrapper>
+          <Wrapper>
+            {measuredImage ? (
+              <Wrapper>
+                <Img
+                  src={`data:image/jpeg;base64,${measuredImage}`}
+                  alt="img"
+                />
+                <h1 style={{ color: "red" }}>
+                  <b>
+                    허리와 무릎의 각도 : {angle} &nbsp; {message}
+                  </b>
+                </h1>
+                <StyledButton type="primary" onClick={recapture}>
+                  다시 측정하기
+                </StyledButton>
+              </Wrapper>
+            ) : imgSrc ? (
+              <Img src={imgSrc} alt="img" />
+            ) : (
+              <Wrapper>
+                <Webcam
+                  audio={false}
+                  ref={webcamRef}
+                  screenshotFormat="image/jpeg"
+                  videoConstraints={videoConstraints}
+                />
+                <StyledButton type="primary" onClick={capture}>
+                  자세 측정하기
+                </StyledButton>
+              </Wrapper>
             )}
-          </div>
-          <h1 style={{ color: "red" }}>
-            <b>
-              허리와 무릎의 각도 : {fileAngle} &nbsp; {fileMessage}
-            </b>
-          </h1>
-        </Wrapper>
+          </Wrapper>
+        </>
       )}
     </BaseContainer>
   );

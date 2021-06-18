@@ -10,9 +10,8 @@ from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 import numpy as np
 import cv2
-
 from image import get_image_path
-from measure import measure_angle_url, measure_angle_file
+from measure import measure_angle
 
 app = Flask(__name__)
 CORS(app)
@@ -38,57 +37,63 @@ def root():
     return response
 
 
-@app.route('/api/posture-url', methods=['GET'])
-def get_angle():
+# @app.route('/api/posture-url', methods=['GET'])
+# def get_angle():
 
-    data = {
-        'image_url': 'http://ncc.phinf.naver.net/20141017_225/1413512182571B2Vuy_JPEG'
-        # 예시1) https://www.sisajournal.com/news/photo/201906/187672_92169_1529.jpg
-        # 예시2) http://ncc.phinf.naver.net/20141017_225/1413512182571B2Vuy_JPEG
-        # 예시3) https://previews.123rf.com/images/endomedion/endomedion1411/endomedion141100016/33515699-%EC%98%AC%EB%B0%94%EB%A5%B8-%EC%95%89%EC%9D%80-%EC%9E%90%EC%84%B8%EC%97%90%EC%84%9C-%EC%9D%98%EC%9E%90%EC%97%90-%EB%B9%84%EC%A6%88%EB%8B%88%EC%8A%A4-%EB%82%A8%EC%9E%90-%ED%9C%B4%EC%8B%9D.jpg
-    }
+#     data = {
+#         'image_url': 'http://ncc.phinf.naver.net/20141017_225/1413512182571B2Vuy_JPEG'
+#         # 예시1) https://www.sisajournal.com/news/photo/201906/187672_92169_1529.jpg
+#         # 예시2) http://ncc.phinf.naver.net/20141017_225/1413512182571B2Vuy_JPEG
+#         # 예시3) https://previews.123rf.com/images/endomedion/endomedion1411/endomedion141100016/33515699-%EC%98%AC%EB%B0%94%EB%A5%B8-%EC%95%89%EC%9D%80-%EC%9E%90%EC%84%B8%EC%97%90%EC%84%9C-%EC%9D%98%EC%9E%90%EC%97%90-%EB%B9%84%EC%A6%88%EB%8B%88%EC%8A%A4-%EB%82%A8%EC%9E%90-%ED%9C%B4%EC%8B%9D.jpg
+#     }
 
-    headers = {
-        'Authorization': KAKAO_APP_KEY
-    }
+#     headers = {
+#         'Authorization': KAKAO_APP_KEY
+#     }
 
-    response = requests.post(KAKAO_URL, data=data, headers=headers).json()
-    # 각도산출
-    angle, message = measure_angle_url(response, data['image_url'])
+#     response = requests.post(KAKAO_URL, data=data, headers=headers).json()
+#     # 각도산출
+#     angle, message = measure_angle_url(response, data['image_url'])
 
-    return jsonify({'angle': angle,  "message": message})
+#     return jsonify({'angle': angle,  "message": message})
 
 
-@app.route('/api/posture-file', methods=['POST'])
-def get_image():
+# @app.route('/api/posture-file', methods=['POST'])
+# def get_image():
+#     image_file = request.files['file']
+#     filename = secure_filename(image_file.filename)
+#     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+#     image_file.save(filepath)
+
+#     session = requests.Session()
+#     session.headers.update({'Authorization': KAKAO_APP_KEY})
+
+#     with open(filepath, 'rb') as f:
+#         response = session.post(KAKAO_URL, files=[('file', f)]).json()
+
+#         angle, message = measure_angle_file(response, filepath)
+
+#         image_path = get_image_path('./uploads/landmark.png')
+
+#         return jsonify({'angle': angle, 'message': message, 'image_path': image_path})
+
+
+@app.route('/api/posture', methods=['POST'])
+def use_opencv():
+    # 이미지 파일 저장
     image_file = request.files['file']
     filename = secure_filename(image_file.filename)
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     image_file.save(filepath)
 
-    session = requests.Session()
-    session.headers.update({'Authorization': KAKAO_APP_KEY})
-
-    with open(filepath, 'rb') as f:
-        response = session.post(KAKAO_URL, files=[('file', f)]).json()
-
-        angle, message = measure_angle_file(response, filepath)
-
-        image_path = get_image_path('./uploads/landmark.png')
-
-        return jsonify({'angle': angle, 'message': message, 'image_path': image_path})
-
-
-@app.route('/api/posture-opencv', methods=['POST'])
-def use_opencv():
-
     # MPII에서 각 파트 번호, 선으로 연결될 POSE_PAIRS
-    BODY_PARTS = {"RShoulder": 2,
+    BODY_PARTS = {"Neck": 1, "RShoulder": 2,
                   "LShoulder": 5, "RHip": 8, "RKnee": 9,
                   "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13,
                   }
 
     POSE_PAIRS = [
+        ["Neck", "RShoulder"], ["Neck", "LShoulder"],
         ["RShoulder", "RHip"], ["RHip", "RKnee"],
         ["RKnee", "RAnkle"], ["LShoulder", "LHip"], ["LHip", "LKnee"], ["LKnee", "LAnkle"]]
 
@@ -162,39 +167,7 @@ def use_opencv():
     cv2.imwrite('./uploads/cv2_image.png', imageCopy)
     image_path = get_image_path('./uploads/cv2_image.png')
 
-    # x - 오른쪽 어께 y - 오른쪽 골반 z - 오른쪽 무릎 각각의 x, y좌표로 배열 생성
-    x = np.array([points[2][0], points[2][1]])
-    y = np.array([points[8][0], points[8][1]])
-    z = np.array([points[9][0], points[9][1]])
-
-    # 골반-어께의 각도
-    w_radian = np.arctan2(x[1] - y[1], x[0] - y[0])
-    w_angle = round(np.abs(w_radian*180.0/np.pi), 0)
-
-    # 골반-무릎의 각도
-    k_radian = np.arctan2(z[1] - y[1], z[0] - y[0])
-    k_angle = round(np.abs(k_radian*180.0/np.pi), 0)
-
-    # 각도 설정
-    if(y[0] < z[0] and y[1] < z[1]):    # 오른쪽에서 찍고 무릎이 골반보다 낮을때
-        angle = np.abs(w_angle)
-    elif(y[0] < z[0] and y[1] > z[1]):  # 오른쪽에서 찍고 무릎이 골반보다 높을때
-        angle = np.abs(w_angle - k_angle)
-    elif(y[0] > z[0] and y[1] < z[1]):  # 왼쪽에서 찍고 무릎이 골반보다 낮을때
-        angle = np.abs(180 - w_angle)
-    else:                                # 왼쪽에서 찍고 무릎이 골반보다 높을때
-        angle = np.abs(k_angle - w_angle)
-
-    # 각도 출력
-    print(angle)
-
-    # 각도로 자세 판단(데이터가 쌓이기 전까지 이 방식으로 표현)
-    if 85 <= angle <= 95:
-        message = "좋습니다."
-    elif angle > 95:
-        message = "뒤로 기울었습니다."
-    else:
-        message = "앞으로 기울었습니다."
+    angle, message = measure_angle(points)
 
     return jsonify({'image_path': image_path, "angle": angle, "message": message})
 

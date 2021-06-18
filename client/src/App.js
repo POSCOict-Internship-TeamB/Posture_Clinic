@@ -17,7 +17,7 @@ function App() {
   return (
     <Suspense fallback={<Spin size="large" />}>
       <Container>
-        <SiderLayout /> 
+        <SiderLayout />
         <Switch>
           <Route exact path="/" component={Login} />
           <Route exact path="/posture" component={Posture} />

@@ -1,14 +1,16 @@
+// https://github.com/SMWP/CAMTO-client
+
 export const PALLETE = {
-  white: '#ffffff',
-  lightGray1: '#dfdfdf',
-  lightGray2: '#c1c1c1',
-  gray1: '#a5a5a5',
-  gray2: '#8b8b8b',
-  gray3: '#6f6f6f',
-  gray4: '#555555',
-  darkGray1: '#3d3d3d',
-  darkGray2: '#242424',
-  black: '#000000',
+  white: "#ffffff",
+  lightGray1: "#dfdfdf",
+  lightGray2: "#c1c1c1",
+  gray1: "#a5a5a5",
+  gray2: "#8b8b8b",
+  gray3: "#6f6f6f",
+  gray4: "#555555",
+  darkGray1: "#3d3d3d",
+  darkGray2: "#242424",
+  black: "#000000",
 };
 
 export const SPACING = {

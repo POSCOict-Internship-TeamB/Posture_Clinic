@@ -1,3 +1,5 @@
+// https://github.com/SMWP/CAMTO-client
+
 import spacing from './spacing';
 
 export const fluid = 'width: 100%;';

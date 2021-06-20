@@ -1,3 +1,5 @@
+// https://github.com/SMWP/CAMTO-client
+
 // import { LINEHEIGHT } from '../values';
 
 export const bold = 'font-weight: bold;';

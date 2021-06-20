@@ -1,3 +1,5 @@
+// https://github.com/SMWP/CAMTO-client
+
 const size = (width, height) => {
   if (height === undefined) {
     return `width:${width}; height:${width};`;

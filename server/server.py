@@ -20,8 +20,6 @@ app.config['UPLOAD_FOLDER'] = './uploads'
 # 키값 호출
 load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI")
-KAKAO_APP_KEY = os.getenv("KAKAO_APP_KEY")
-KAKAO_URL = os.getenv("KAKAO_URL")
 
 # MONGO DB
 client = MongoClient(MONGO_URI)

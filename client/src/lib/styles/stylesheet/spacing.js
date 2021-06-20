@@ -1,3 +1,5 @@
+// https://github.com/SMWP/CAMTO-client
+
 import { SPACING } from '../values';
 
 const spacing = {

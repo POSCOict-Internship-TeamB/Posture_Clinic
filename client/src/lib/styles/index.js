@@ -1,4 +1,6 @@
 
+// https://github.com/SMWP/CAMTO-client
+
 import * as alignChild from './stylesheet/alignChild';
 import * as alignSelf from './stylesheet/alignSelf';
 // import * as mediaQuery from './stylesheet/mediaQuery';

@@ -1,9 +1,17 @@
 import React, { useState, useRef, useCallback } from "react";
 import BaseContainer from "components/BaseComponents";
 import Webcam from "react-webcam";
-import { Button, Spin } from "antd";
+import { Button, Spin, Steps } from "antd";
 import axios from "axios";
 import styled from "@emotion/styled";
+import {
+  CameraOutlined,
+  CheckCircleOutlined,
+  LoadingOutlined,
+  VideoCameraAddOutlined,
+} from "@ant-design/icons";
+
+const { Step } = Steps;
 
 const Img = styled.img`
   width: 622px;
@@ -31,8 +39,28 @@ const StyledSpin = styled(Spin)`
   align-items: center;
 `;
 
+const steps = [
+  {
+    title: <b>Image Capture</b>,
+    icon: <VideoCameraAddOutlined />,
+  },
+  {
+    title: <b>Check Image</b>,
+    icon: <CameraOutlined />,
+  },
+  {
+    title: <b>Analyze Image</b>,
+    icon: <LoadingOutlined />,
+  },
+  {
+    title: <b>Result</b>,
+    icon: <CheckCircleOutlined />,
+  },
+];
+
 function Posture() {
   const webcamRef = useRef(null);
+  const [current, setCurrent] = useState(0);
   const [loading, setLoading] = useState(false);
   const [imgSrc, setImgSrc] = useState(null);
   const [angle, setAngle] = useState("");
@@ -59,56 +87,91 @@ function Posture() {
   };
 
   const capture = useCallback(() => {
-    setLoading(true);
     const capturedImg = webcamRef.current.getScreenshot();
-    console.log(capturedImg);
-    const data = new FormData();
-    const file = dataURItoBlob(capturedImg);
-    data.append("file", file, "posture.png");
     setImgSrc(capturedImg);
+    setCurrent(current + 1);
+    console.log(capturedImg);
+  }, [webcamRef, setImgSrc]);
+
+  const analyzeImage = () => {
+    const data = new FormData();
+    const file = dataURItoBlob(imgSrc);
+    data.append("file", file, "posture.png");
+    setLoading(true);
+    setCurrent(current + 1);
 
     axios.post("http://localhost:5000/api/posture", data).then((response) => {
-      setLoading(false);
-      console.log(response.data);
-      setMeasuredImage(response.data.image_path);
-      setAngle(response.data.angle);
-      setMessage(response.data.message);
+      if (response.data) {
+        setLoading(false);
+        setCurrent(4);
+        console.log(response.data);
+        setMeasuredImage(response.data.image_path);
+        setAngle(response.data.angle);
+        setMessage(response.data.message);
+      }
     });
-  }, [webcamRef, setImgSrc]);
+  };
 
   const recapture = () => {
     setImgSrc("");
     setMeasuredImage("");
+    setCurrent(0);
   };
+
+  //! 결과 출력 오른쪽에 출력  Steps 타이포그래피 찾아보기
 
   return (
     <BaseContainer>
+      <div style={{ margin: "2rem" }}>
+        <Steps current={current}>
+          {steps.map((item) => (
+            <Step key={item.title} title={item.title} icon={item.icon} />
+          ))}
+        </Steps>
+      </div>
       {loading ? (
         <StyledSpin tip="Loading..." size="large" />
       ) : (
         <>
           <Wrapper>
-            <div style={{ display: "flex", margin: "2rem" }}>
-              {imgSrc ? (
-                <Img src={imgSrc} alt="img" />
-              ) : (
-                <Wrapper>
-                  <Webcam
-                    audio={false}
-                    ref={webcamRef}
-                    screenshotFormat="image/jpeg"
-                    videoConstraints={videoConstraints}
-                  />
-                  <StyledButton type="primary" onClick={capture}>
-                    자세 측정하기
-                  </StyledButton>
-                </Wrapper>
-              )}
-            </div>
+            {measuredImage === "" && (
+              <div style={{ display: "flex", margin: "2rem" }}>
+                {imgSrc ? (
+                  <Wrapper>
+                    <h1>
+                      <b>Step 2. 자세 측정</b>
+                    </h1>
+                    <Img src={imgSrc} alt="img" />
+                    <StyledButton type="primary" onClick={analyzeImage}>
+                      자세 측정하기
+                    </StyledButton>
+                  </Wrapper>
+                ) : (
+                  <Wrapper>
+                    <h1>
+                      <b>Step 1. 이미지 캡처</b>
+                    </h1>
+                    <Webcam
+                      audio={false}
+                      ref={webcamRef}
+                      screenshotFormat="image/jpeg"
+                      videoConstraints={videoConstraints}
+                    />
+                    <StyledButton type="danger" onClick={capture}>
+                      화면 캡처하기
+                    </StyledButton>
+                  </Wrapper>
+                )}
+              </div>
+            )}
           </Wrapper>
-          <Wrapper>
-            {measuredImage ? (
+
+          {measuredImage && (
+            <div style={{ display: "flex", margin: "2rem" }}>
               <Wrapper>
+                <h1>
+                  <b>Step 3. 결과확인</b>
+                </h1>
                 <Img
                   src={`data:image/jpeg;base64,${measuredImage}`}
                   alt="img"
@@ -118,26 +181,12 @@ function Posture() {
                     허리와 무릎의 각도 : {angle} &nbsp; {message}
                   </b>
                 </h1>
-                <StyledButton type="primary" onClick={recapture}>
+                <StyledButton type="danger" onClick={recapture}>
                   다시 측정하기
                 </StyledButton>
               </Wrapper>
-            ) : imgSrc ? (
-              <Img src={imgSrc} alt="img" />
-            ) : (
-              <Wrapper>
-                <Webcam
-                  audio={false}
-                  ref={webcamRef}
-                  screenshotFormat="image/jpeg"
-                  videoConstraints={videoConstraints}
-                />
-                <StyledButton type="primary" onClick={capture}>
-                  자세 측정하기
-                </StyledButton>
-              </Wrapper>
-            )}
-          </Wrapper>
+            </div>
+          )}
         </>
       )}
     </BaseContainer>

@@ -1,3 +1,5 @@
+// https://github.com/SMWP/CAMTO-client
+
 import { BREAKPOINT } from '../values';
 
 const breakpoint = Object.values(BREAKPOINT);

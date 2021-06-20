@@ -1,3 +1,5 @@
+// https://github.com/SMWP/CAMTO-client
+
 import { PAD } from '../values';
 
 const pad = {

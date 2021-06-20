@@ -1,3 +1,4 @@
+// https://github.com/SMWP/CAMTO-client
 export const flex = `
     display:flex;
     flex-wrap:wrap;

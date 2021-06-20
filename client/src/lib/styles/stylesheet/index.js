@@ -1,3 +1,5 @@
+// https://github.com/SMWP/CAMTO-client
+
 export * as alignChild from './alignChild';
 export * as alignSelf from './alignSelf';
 export * as mediaQuery from './mediaQuery';

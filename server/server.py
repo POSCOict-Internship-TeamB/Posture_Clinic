@@ -23,57 +23,16 @@ MONGO_URI = os.getenv("MONGO_URI")
 
 # MONGO DB
 client = MongoClient(MONGO_URI)
-db = client.get_database('test')
+db = client.get_database('data')
 
 
-@app.route('/api', methods=['GET'])
-@cross_origin()
-def root():
-    db.hits.insert_one({'time': datetime.utcnow()})
-    response = jsonify(
-        message='This page has been visited {} times.'.format(db.hits.count()))
-    return response
-
-
-# @app.route('/api/posture-url', methods=['GET'])
-# def get_angle():
-
-#     data = {
-#         'image_url': 'http://ncc.phinf.naver.net/20141017_225/1413512182571B2Vuy_JPEG'
-#         # 예시1) https://www.sisajournal.com/news/photo/201906/187672_92169_1529.jpg
-#         # 예시2) http://ncc.phinf.naver.net/20141017_225/1413512182571B2Vuy_JPEG
-#         # 예시3) https://previews.123rf.com/images/endomedion/endomedion1411/endomedion141100016/33515699-%EC%98%AC%EB%B0%94%EB%A5%B8-%EC%95%89%EC%9D%80-%EC%9E%90%EC%84%B8%EC%97%90%EC%84%9C-%EC%9D%98%EC%9E%90%EC%97%90-%EB%B9%84%EC%A6%88%EB%8B%88%EC%8A%A4-%EB%82%A8%EC%9E%90-%ED%9C%B4%EC%8B%9D.jpg
-#     }
-
-#     headers = {
-#         'Authorization': KAKAO_APP_KEY
-#     }
-
-#     response = requests.post(KAKAO_URL, data=data, headers=headers).json()
-#     # 각도산출
-#     angle, message = measure_angle_url(response, data['image_url'])
-
-#     return jsonify({'angle': angle,  "message": message})
-
-
-# @app.route('/api/posture-file', methods=['POST'])
-# def get_image():
-#     image_file = request.files['file']
-#     filename = secure_filename(image_file.filename)
-#     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-#     image_file.save(filepath)
-
-#     session = requests.Session()
-#     session.headers.update({'Authorization': KAKAO_APP_KEY})
-
-#     with open(filepath, 'rb') as f:
-#         response = session.post(KAKAO_URL, files=[('file', f)]).json()
-
-#         angle, message = measure_angle_file(response, filepath)
-
-#         image_path = get_image_path('./uploads/landmark.png')
-
-#         return jsonify({'angle': angle, 'message': message, 'image_path': image_path})
+# @app.route('/api', methods=['GET'])
+# @cross_origin()
+# def root():
+#     db.hits.insert_one({'time': datetime.utcnow()})
+#     response = jsonify(
+#         message='This page has been visited {} times.'.format(db.hits.count()))
+#     return response
 
 
 @app.route('/api/posture', methods=['POST'])
@@ -84,16 +43,16 @@ def use_opencv():
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     image_file.save(filepath)
 
-    # MPII에서 각 파트 번호, 선으로 연결될 POSE_PAIRS
-    BODY_PARTS = {"Neck": 1, "RShoulder": 2,
-                  "LShoulder": 5, "RHip": 8, "RKnee": 9,
-                  "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13,
-                  }
+    # 관절 번호: 머리는 0, 목은 1 등등
+    BODY_PARTS = {"Head": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
+                  "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
+                  "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13, "Chest": 14,
+                  "Background": 15}
 
-    POSE_PAIRS = [
-        ["Neck", "RShoulder"], ["Neck", "LShoulder"],
-        ["RShoulder", "RHip"], ["RHip", "RKnee"],
-        ["RKnee", "RAnkle"], ["LShoulder", "LHip"], ["LHip", "LKnee"], ["LKnee", "LAnkle"]]
+    # 관절들을 선으로 이을 때 쌍이 되는 것들
+    POSE_PAIRS = [["RShoulder", "LShoulder"], ["LShoulder", "LHip"], ["LHip", "RHip"],
+                  ["RHip", "RShoulder"], ["RHip", "RKnee"], ["RKnee", "RAnkle"],
+                  ["LHip", "LKnee"], ["LKnee", "LAnkle"]]
 
     # 각 파일 path
     protoFile = "./pose_deploy_linevec.prototxt"
@@ -122,8 +81,6 @@ def use_opencv():
     # output.shape[0] = 이미지 ID, [1] = 출력 맵의 높이, [2] = 너비
     H = output.shape[2]
     W = output.shape[3]
-    print("이미지 ID : ", len(output[0]), ", H : ",
-          output.shape[2], ", W : ", output.shape[3])  # 이미지 ID
 
     # 키포인트 검출시 이미지에 그려줌
     points = []
@@ -138,20 +95,16 @@ def use_opencv():
         x = (imageWidth * point[0]) / W
         y = (imageHeight * point[1]) / H
 
-        # 키포인트 검출한 결과가 0.1보다 크면(검출한곳이 위 BODY_PARTS랑 맞는 부위면) points에 추가, 검출했는데 부위가 없으면 None으로
+        # 키포인트 검출한 결과가 0.1보다 크면(검출한곳이 위 BODY_PARTS랑 맞는 부위면) points에 추가, 검출했는데 부위가 없으면 -1,-1으로
         if prob > 0.1:
-            cv2.circle(image, (int(x), int(y)), 3, (0, 255, 255), thickness=-1,
-                       lineType=cv2.FILLED)       # circle(그릴곳, 원의 중심, 반지름, 색)
-            cv2.putText(image, "{}".format(i), (int(x), int(
-                y)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, lineType=cv2.LINE_AA)
-            points.append((int(x), int(y)))
+            points.append([int(x), int(y)])
         else:
-            points.append(None)
+            points.append([-1, -1])
 
     # 이미지 복사
     imageCopy = image
 
-    # 각 POSE_PAIRS별로 선 그어줌 (머리 - 목, 목 - 왼쪽어깨, ...)
+    # 각 랜드마크끼리 선 그어줌 (위에 잇고싶은 랜드마크 쌍만 연결)
     for pair in POSE_PAIRS:
         partA = pair[0]             # Head
         partA = BODY_PARTS[partA]   # 0
@@ -160,14 +113,42 @@ def use_opencv():
 
         #print(partA," 와 ", partB, " 연결\n")
         if points[partA] and points[partB]:
-            cv2.line(imageCopy, points[partA], points[partB], (0, 255, 0), 2)
+            if points[partB] == [-1, -1]:
+                continue
+            else:
+                cv2.line(imageCopy, points[partA],
+                         points[partB], (255, 0, 0), 1)
+
+    # 표시하고싶은 랜드마크
+    arr = [1, 2, 5, 8, 9, 10, 11, 12, 13]
+
+    # 표시하고싶은 랜드마크에 점 찍기
+    for i in arr:
+        if (points[i] == [-1, -1]):
+            continue
+        else:
+            # circle(그릴곳, 원의 중심, 반지름, 색)
+            cv2.circle(image, (points[i][0], points[i][1]), 3,
+                       (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
+            # cv2.putText(image, "{}".format(i), (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, lineType=cv2.LINE_AA)
+
+    # 목과의 각도를 구하기 위해 양 어께의 중간 좌표 구하기
+    ms_x = round((points[2][0] + points[5][0])/2)
+    ms_y = round((points[2][1] + points[5][1])/2)
+
+    points.append([ms_x, ms_y])   # points배열의 15번째에 들어감
+
+    cv2.line(imageCopy, points[15], points[1],
+             (255, 0, 0), 1)   # 어께의 중간과 목을 선으로 잇기
 
     cv2.imwrite('./uploads/cv2_image.png', imageCopy)
     image_path = get_image_path('./uploads/cv2_image.png')
 
-    angle, message = measure_angle(points)
+    wk_angle, wk_message, n_angle, n_message = measure_angle(points)
+    # db.result.insert_one({'image_path': image_path, "wk_angle": wk_angle,
+    #                      "wk_message": wk_message,  "n_angle": n_angle, "n_message": n_message})
 
-    return jsonify({'image_path': image_path, "angle": angle, "message": message})
+    return jsonify({'image_path': image_path, "wk_angle": wk_angle, "wk_message": wk_message,  "n_angle": n_angle, "n_message": n_message})
 
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback } from "react";
 import BaseContainer from "components/BaseComponents";
 import Webcam from "react-webcam";
-import { Button, Spin, Steps } from "antd";
+import { Button, Spin, Steps, Typography } from "antd";
 import axios from "axios";
 import styled from "@emotion/styled";
 import {
@@ -9,13 +9,15 @@ import {
   CheckCircleOutlined,
   LoadingOutlined,
   VideoCameraAddOutlined,
+  MonitorOutlined,
 } from "@ant-design/icons";
 
 const { Step } = Steps;
+const { Text, Title } = Typography;
 
 const Img = styled.img`
-  width: 622px;
-  height: 350px;
+  width: 700px;
+  height: 500px;
 `;
 
 const Wrapper = styled.div`
@@ -37,6 +39,15 @@ const StyledSpin = styled(Spin)`
   flex-direction: column;
   justify-content: center;
   align-items: center;
+`;
+
+const InfoContainer = styled.div`
+  margin: 4rem;
+  border-radius: 20px;
+`;
+
+const Info = styled.div`
+  height: 100%;
 `;
 
 const steps = [
@@ -63,13 +74,15 @@ function Posture() {
   const [current, setCurrent] = useState(0);
   const [loading, setLoading] = useState(false);
   const [imgSrc, setImgSrc] = useState(null);
-  const [angle, setAngle] = useState("");
-  const [message, setMessage] = useState("");
+  const [wkAngle, setWkAngle] = useState("");
+  const [wkMessage, setWkMessage] = useState("");
+  const [nAngle, setNAngle] = useState("");
+  const [nMessage, setNMessage] = useState("");
   const [measuredImage, setMeasuredImage] = useState("");
 
   const videoConstraints = {
-    width: "622",
-    height: "350",
+    width: "700",
+    height: "500",
     facingMode: "user",
   };
 
@@ -106,8 +119,10 @@ function Posture() {
         setCurrent(4);
         console.log(response.data);
         setMeasuredImage(response.data.image_path);
-        setAngle(response.data.angle);
-        setMessage(response.data.message);
+        setWkAngle(parseInt(response.data.wk_angle));
+        setWkMessage(response.data.wk_message);
+        setNAngle(parseInt(response.data.n_angle));
+        setNMessage(response.data.n_message);
       }
     });
   };
@@ -118,7 +133,27 @@ function Posture() {
     setCurrent(0);
   };
 
-  //! 결과 출력 오른쪽에 출력  Steps 타이포그래피 찾아보기
+  const messageColor = (angle, part) => {
+    if (part === "wk") {
+      if (angle >= 85 && angle <= 95) {
+        return "success";
+      }
+      if (angle > 95) {
+        return "warning";
+      } else {
+        return "danger";
+      }
+    } else {
+      if (angle >= 80 && angle <= 100) {
+        return "success";
+      }
+      if (angle > 100) {
+        return "warning";
+      } else {
+        return "danger";
+      }
+    }
+  };
 
   return (
     <BaseContainer>
@@ -135,29 +170,47 @@ function Posture() {
         <>
           <Wrapper>
             {measuredImage === "" && (
-              <div style={{ display: "flex", margin: "2rem" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  margin: "2rem",
+                }}
+              >
                 {imgSrc ? (
                   <Wrapper>
-                    <h1>
-                      <b>Step 2. 자세 측정</b>
-                    </h1>
+                    <Title>
+                      <Text mark>
+                        <b>Step 2. Analyze Image</b>
+                      </Text>
+                    </Title>
                     <Img src={imgSrc} alt="img" />
-                    <StyledButton type="primary" onClick={analyzeImage}>
+                    <StyledButton
+                      type="primary"
+                      icon={<MonitorOutlined />}
+                      onClick={analyzeImage}
+                    >
                       자세 측정하기
                     </StyledButton>
                   </Wrapper>
                 ) : (
                   <Wrapper>
-                    <h1>
-                      <b>Step 1. 이미지 캡처</b>
-                    </h1>
+                    <Title>
+                      <Text mark>
+                        <b>Step 1. Image Capture</b>
+                      </Text>
+                    </Title>
                     <Webcam
                       audio={false}
                       ref={webcamRef}
                       screenshotFormat="image/jpeg"
                       videoConstraints={videoConstraints}
                     />
-                    <StyledButton type="danger" onClick={capture}>
+                    <StyledButton
+                      type="danger"
+                      icon={<CameraOutlined />}
+                      onClick={capture}
+                    >
                       화면 캡처하기
                     </StyledButton>
                   </Wrapper>
@@ -167,24 +220,51 @@ function Posture() {
           </Wrapper>
 
           {measuredImage && (
-            <div style={{ display: "flex", margin: "2rem" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-around",
+                margin: "2rem",
+              }}
+            >
               <Wrapper>
-                <h1>
-                  <b>Step 3. 결과확인</b>
-                </h1>
+                <Title>
+                  <Text mark>
+                    <b>Step 3. Result</b>
+                  </Text>
+                </Title>
                 <Img
                   src={`data:image/jpeg;base64,${measuredImage}`}
                   alt="img"
                 />
-                <h1 style={{ color: "red" }}>
-                  <b>
-                    허리와 무릎의 각도 : {angle} &nbsp; {message}
-                  </b>
-                </h1>
-                <StyledButton type="danger" onClick={recapture}>
+                <StyledButton
+                  type="danger"
+                  icon={<VideoCameraAddOutlined />}
+                  onClick={recapture}
+                >
                   다시 측정하기
                 </StyledButton>
               </Wrapper>
+              <InfoContainer>
+                <Info>
+                  <Title level={2}>
+                    <Text>결과 확인</Text>
+                  </Title>
+                  <Title level={3}>
+                    <Text type={messageColor(wkAngle, "wk")}>
+                      <b>
+                        허리와 무릎의 각도 : {wkAngle} <br /> {wkMessage}
+                      </b>
+                    </Text>
+                    <br />
+                    <Text type={messageColor(nAngle, "n")}>
+                      <b>
+                        목 각도 : {nAngle} <br /> {nMessage}
+                      </b>
+                    </Text>
+                  </Title>
+                </Info>
+              </InfoContainer>
             </div>
           )}
         </>

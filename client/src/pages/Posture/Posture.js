@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback } from "react";
 import BaseContainer from "components/BaseComponents";
 import Webcam from "react-webcam";
-import { Button, Spin, Steps, Typography } from "antd";
+import { Button, Spin, Steps, Typography, Divider } from "antd";
 import axios from "axios";
 import styled from "@emotion/styled";
 import {
@@ -42,12 +42,19 @@ const StyledSpin = styled(Spin)`
 `;
 
 const InfoContainer = styled.div`
-  margin: 4rem;
-  border-radius: 20px;
+  height: 100%;
 `;
 
 const Info = styled.div`
-  height: 100%;
+  display: flex;
+  padding: 4rem;
+  justify-content: center;
+  flex-direction: column;
+`;
+
+const P = styled.p`
+  font-size: 0.7rem;
+  color: #595959;
 `;
 
 const steps = [
@@ -103,8 +110,7 @@ function Posture() {
     const capturedImg = webcamRef.current.getScreenshot();
     setImgSrc(capturedImg);
     setCurrent(current + 1);
-    console.log(capturedImg);
-  }, [webcamRef, setImgSrc]);
+  }, [current]);
 
   const analyzeImage = () => {
     const data = new FormData();
@@ -135,10 +141,10 @@ function Posture() {
 
   const messageColor = (angle, part) => {
     if (part === "wk") {
-      if (angle >= 85 && angle <= 95) {
+      if (angle >= 95 && angle <= 125) {
         return "success";
       }
-      if (angle > 95) {
+      if (angle > 125) {
         return "warning";
       } else {
         return "danger";
@@ -181,7 +187,7 @@ function Posture() {
                   <Wrapper>
                     <Title>
                       <Text mark>
-                        <b>Step 2. Analyze Image</b>
+                        <b>Step 2. Check / Analyze Image</b>
                       </Text>
                     </Title>
                     <Img src={imgSrc} alt="img" />
@@ -247,22 +253,66 @@ function Posture() {
               </Wrapper>
               <InfoContainer>
                 <Info>
-                  <Title level={2}>
-                    <Text>결과 확인</Text>
+                  <Title>
+                    <Text mark>
+                      <b>결과를 확인하세요!</b>
+                    </Text>
                   </Title>
                   <Title level={3}>
-                    <Text type={messageColor(wkAngle, "wk")}>
-                      <b>
-                        허리와 무릎의 각도 : {wkAngle} <br /> {wkMessage}
-                      </b>
-                    </Text>
-                    <br />
+                    측정된 어깨와 목간의 각도는 <Text code>{nAngle}</Text>도
+                    입니다. <br />
                     <Text type={messageColor(nAngle, "n")}>
-                      <b>
-                        목 각도 : {nAngle} <br /> {nMessage}
-                      </b>
+                      <b>{nMessage}</b>
                     </Text>
                   </Title>
+                  <Title level={3}>
+                    측정된 척추와 무릎간의 각도는 <Text code>{wkAngle}</Text>
+                    도 입니다 <br />
+                    <Text type={messageColor(wkAngle, "wk")}>
+                      <b>{wkMessage}</b>
+                    </Text>
+                  </Title>
+
+                  <div style={{ marginTop: "6rem" }}>
+                    <Divider orientation="left">
+                      <b>목</b>
+                    </Divider>
+                    <P>
+                      80도 이상 100도 이하 :
+                      <Text type="success">올바른 자세</Text>
+                    </P>
+                    <P>
+                      100도 초과 :
+                      <Text type="warning">
+                        주의단계 (장시간 유지 시 목,어깨에 무리)
+                      </Text>
+                    </P>
+                    <P>
+                      80도 미만 :
+                      <Text type="danger">
+                        경고단계 (장시간 유지 시 거북목의 원인)
+                      </Text>
+                    </P>
+                    <Divider orientation="left">
+                      <b>척추</b>
+                    </Divider>
+                    <P>
+                      95도 이상 125도 이하 :
+                      <Text type="success">올바른 자세</Text>
+                    </P>
+                    <P>
+                      125도 초과 :
+                      <Text type="warning">
+                        주의단계 (장시간 유지 시 척추에 무리)
+                      </Text>
+                    </P>
+                    <P>
+                      95도 미만 :
+                      <Text type="danger">
+                        경고단계 (장시간 유지 시 허리디스크의 원인)
+                      </Text>
+                    </P>
+                  </div>
                 </Info>
               </InfoContainer>
             </div>

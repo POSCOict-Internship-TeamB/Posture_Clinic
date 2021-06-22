@@ -1,5 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import cross_origin, CORS
+import json
+from bson import json_util
 from pymongo import MongoClient
 from datetime import datetime
 import requests
@@ -36,7 +38,7 @@ db = client.get_database('data')
 
 
 @app.route('/api/posture', methods=['POST'])
-def use_opencv():
+def analyze_image():
     # 이미지 파일 저장
     image_file = request.files['file']
     filename = secure_filename(image_file.filename)
@@ -145,10 +147,17 @@ def use_opencv():
     image_path = get_image_path('./uploads/cv2_image.png')
 
     wk_angle, wk_message, n_angle, n_message = measure_angle(points)
-    # db.result.insert_one({'image_path': image_path, "wk_angle": wk_angle,
-    #                      "wk_message": wk_message,  "n_angle": n_angle, "n_message": n_message})
+    # DB 저장
+    db.result.insert_one({'image_path': image_path, "wk_angle": wk_angle,
+                         "wk_message": wk_message,  "n_angle": n_angle, "n_message": n_message, 'time': datetime.now().replace(microsecond=0).isoformat()})
 
     return jsonify({'image_path': image_path, "wk_angle": wk_angle, "wk_message": wk_message,  "n_angle": n_angle, "n_message": n_message})
+
+
+@app.route('/api/result', methods=['GET'])
+def get_result():
+    result = list(db.result.find())
+    return json.dumps(result, default=json_util.default)
 
 
 if __name__ == '__main__':

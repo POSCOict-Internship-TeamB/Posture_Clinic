@@ -3,7 +3,7 @@ import { Layout, Menu } from "antd";
 
 import { NavLink, withRouter } from "react-router-dom";
 import {
-  SettingOutlined,
+  CameraOutlined,
   UserOutlined,
   PieChartOutlined,
 } from "@ant-design/icons";
@@ -27,7 +27,7 @@ const Img = styled.img`
   display: inline-block;
   height: 50px;
   vertical-align: middle;
-  padding-left: 15px;
+  padding-left: 10px;
 `;
 
 const MenuContainer = styled.div`
@@ -51,10 +51,10 @@ function SiderLayout() {
           width="250px"
         >
           <MenuContainer>
-            <NavLink to="/">
+            <NavLink to="/posture">
               <LogoContainer>
                 <Img
-                  src="https://arcweb.co/wp-content/uploads/2016/10/react-logo-1000-transparent.png"
+                  src={process.env.PUBLIC_URL + "/mainlogo.png"}
                   alt="Logo"
                 />
                 <span>{!collapsed ? <b>Posture-Clinic</b> : ""}</span>
@@ -77,7 +77,7 @@ function SiderLayout() {
               </Menu.Item>
               <Menu.Item key="/posture">
                 <NavLink to="/posture">
-                  <SettingOutlined />
+                  <CameraOutlined />
                   <span>posture</span>
                 </NavLink>
               </Menu.Item>

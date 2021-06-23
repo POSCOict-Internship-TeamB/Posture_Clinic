@@ -1,5 +1,6 @@
 import axios from "axios";
 import BaseContainer from "components/BaseComponents";
+import ResultModal from "./ResultModal";
 import React, { useEffect, useState } from "react";
 import { Card, Col, Row, Avatar } from "antd";
 
@@ -9,6 +10,8 @@ const { Meta } = Card;
 
 function Dashboard() {
   const [resultList, setResultList] = useState([]);
+  const [visible, setVisible] = useState(false);
+  const [result, setResult] = useState([]);
 
   useEffect(() => {
     axios.get("http://localhost:5000/api/result").then((response) => {
@@ -18,6 +21,15 @@ function Dashboard() {
       }
     });
   }, []);
+
+  const showModal = (props) => {
+    setVisible(true);
+    setResult(props);
+  };
+
+  const handleCancel = (props) => {
+    setVisible(props);
+  };
 
   const renderCards = resultList.map((list, index) => {
     const date = list.time.slice(0, 10);
@@ -54,6 +66,7 @@ function Dashboard() {
               />
             </div>,
           ]}
+          onClick={() => showModal(list)}
         >
           {date} 측정 결과
         </Card>
@@ -64,6 +77,11 @@ function Dashboard() {
   return (
     <BaseContainer>
       <Row gutter={[32, 32]}>{renderCards}</Row>
+      <ResultModal
+        visible={visible}
+        handleCancel={handleCancel}
+        data={result}
+      />
     </BaseContainer>
   );
 }

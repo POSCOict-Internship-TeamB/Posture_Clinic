@@ -11,14 +11,13 @@ import {
   Tag,
   Typography,
   Statistic,
-  Descriptions,
-  Badge,
+  Tooltip,
 } from "antd";
 
 import { UserOutlined } from "@ant-design/icons";
 
 const { Meta } = Card;
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 const MainContainer = styled.div`
   margin: 40px;
@@ -45,6 +44,10 @@ const StyledCard = styled(Card)`
   width: 50%;
   display: flex;
   justify-content: center;
+`;
+const P = styled.p`
+  font-size: 0.7rem;
+  color: #fff;
 `;
 
 function Dashboard() {
@@ -181,45 +184,86 @@ function Dashboard() {
         <Title level={2}>
           <b>name님의 지난 측정 결과</b>
         </Title>
-
-        {/* <Descriptions title="사용자 정보" bordered>
-            <Descriptions.Item label="이름">박현우</Descriptions.Item>
-            <Descriptions.Item label="나이">25</Descriptions.Item>
-            <Descriptions.Item label="성별">남성</Descriptions.Item>
-          </Descriptions> */}
-
         <StatisticContainer>
           <StyledCard>
-            <Statistic
-              title={<b>목 평균</b>}
-              value={calAngleAvg("n")}
-              precision={2}
-              valueStyle={{ color: "#3f8600" }}
-              prefix={
-                <img
-                  style={{ width: "40px", height: "40px" }}
-                  src={process.env.PUBLIC_URL + "/neck.png"}
-                  alt="icon"
-                />
+            <Tooltip
+              placement="bottomLeft"
+              title={
+                <>
+                  <P>
+                    80도 이상 100도 이하 :
+                    <Text type="success">올바른 자세</Text>
+                  </P>
+                  <P>
+                    100도 초과 :
+                    <Text type="warning">
+                      주의단계 (장시간 유지 시 목,어깨에 무리)
+                    </Text>
+                  </P>
+                  <P>
+                    80도 미만 :
+                    <Text type="danger">
+                      경고단계 (장시간 유지 시 거북목의 원인)
+                    </Text>
+                  </P>
+                </>
               }
-              suffix="°"
-            />
+            >
+              <Statistic
+                title={<b>목 평균</b>}
+                value={calAngleAvg("n")}
+                precision={2}
+                valueStyle={{ color: "#3f8600" }}
+                prefix={
+                  <img
+                    style={{ width: "40px", height: "40px" }}
+                    src={process.env.PUBLIC_URL + "/neck.png"}
+                    alt="icon"
+                  />
+                }
+                suffix="°"
+              />
+            </Tooltip>
           </StyledCard>
           <StyledCard>
-            <Statistic
-              title={<b>허리 평균</b>}
-              value={calAngleAvg("wk")}
-              precision={2}
-              valueStyle={{ color: "#cf1322" }}
-              prefix={
-                <img
-                  style={{ width: "40px", height: "40px" }}
-                  src={process.env.PUBLIC_URL + "/sit.png"}
-                  alt="icon"
-                />
+            <Tooltip
+              placement="bottomLeft"
+              title={
+                <>
+                  <P>
+                    95도 이상 125도 이하 :
+                    <Text type="success">올바른 자세</Text>
+                  </P>
+                  <P>
+                    125도 초과 :
+                    <Text type="warning">
+                      주의단계 (장시간 유지 시 척추에 무리)
+                    </Text>
+                  </P>
+                  <P>
+                    95도 미만 :
+                    <Text type="danger">
+                      경고단계 (장시간 유지 시 허리디스크의 원인)
+                    </Text>
+                  </P>
+                </>
               }
-              suffix="°"
-            />
+            >
+              <Statistic
+                title={<b>허리 평균</b>}
+                value={calAngleAvg("wk")}
+                precision={2}
+                valueStyle={{ color: "#cf1322" }}
+                prefix={
+                  <img
+                    style={{ width: "40px", height: "40px" }}
+                    src={process.env.PUBLIC_URL + "/sit.png"}
+                    alt="icon"
+                  />
+                }
+                suffix="°"
+              />
+            </Tooltip>
           </StyledCard>
         </StatisticContainer>
       </MainContainer>

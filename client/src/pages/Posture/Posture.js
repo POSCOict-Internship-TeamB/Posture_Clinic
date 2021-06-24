@@ -259,7 +259,7 @@ function Posture() {
                     </Text>
                   </Title>
                   <Title level={3}>
-                    측정된 어깨와 목간의 각도는 <Text code>{nAngle}</Text>도
+                    측정된 어깨와 목간의 각도는 <Text code>{nAngle}</Text>°
                     입니다. <br />
                     <Text type={messageColor(nAngle, "n")}>
                       <b>{nMessage}</b>
@@ -267,7 +267,7 @@ function Posture() {
                   </Title>
                   <Title level={3}>
                     측정된 척추와 무릎간의 각도는 <Text code>{wkAngle}</Text>
-                    도 입니다 <br />
+                    ° 입니다 <br />
                     <Text type={messageColor(wkAngle, "wk")}>
                       <b>{wkMessage}</b>
                     </Text>

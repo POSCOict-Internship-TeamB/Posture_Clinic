@@ -8,18 +8,17 @@ const Img = styled.img`
   height: 300px;
 `;
 
-const Wrapper = styled.div`
+const Container = styled.div`
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
 `;
 
 function ResultModal(props) {
-  console.log(props);
   return (
     <div>
       <Modal
         visible={props.visible}
-        width={550}
+        width={900}
         title={<b>측정 결과</b>}
         onCancel={() => props.handleCancel(false)}
         footer={[
@@ -32,7 +31,7 @@ function ResultModal(props) {
           </Button>,
         ]}
       >
-        <Wrapper>
+        <Container>
           <Img
             src={`data:image/jpeg;base64,${props.data.image_path}`}
             alt="img"
@@ -41,7 +40,7 @@ function ResultModal(props) {
           {props.data.wk_message}
           목각도 : {props.data.n_angle}
           {props.data.n_message}
-        </Wrapper>
+        </Container>
       </Modal>
     </div>
   );

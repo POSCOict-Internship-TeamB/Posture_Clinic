@@ -9,5 +9,4 @@ client/yarn.lock
 server/env
 server/config/dev.py
 node_modules
-# server/pose_deploy_linevec.prototxt
-# server/pose_iter_160000.caffemodel
+

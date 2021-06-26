@@ -1,4 +1,5 @@
 import numpy as np
+import csv
 
 
 def measure_angle(points):
@@ -23,9 +24,6 @@ def measure_angle(points):
         else:               # 무릎이 골반보다 높을 때
             angle = np.abs(w_angle - k_angle)
 
-        # 각도 출력
-        print(angle)
-
         wk_angle = angle
 
     else:                 # 왼쪽에서 찍은 사진일 때
@@ -47,9 +45,6 @@ def measure_angle(points):
         else:             # 무릎이 골반보다 높을 때
             angle = np.abs(k_angle - w_angle)
 
-        # 각도 출력
-        print(angle)
-
         wk_angle = angle
 
     # 허리 각도로 자세 판단(데이터가 쌓이기 전까지 이 방식으로 표현)
@@ -59,8 +54,6 @@ def measure_angle(points):
         wk_message = "의자를 당겨 엉덩이를 밀착시켜주세요! 장시간 뒤로 젖힌 자세는 척추건강에 좋지 않습니다. "
     else:
         wk_message = "허리를 펴주세요! 구부정한 자세는 허리디스크의 원인이 됩니다."
-
-    print(wk_message)
 
     # n - 목 ms - 어께의 중앙
     n = np.array([points[1][0], points[1][1]])
@@ -76,9 +69,6 @@ def measure_angle(points):
     elif(h[0] > k[0]):  # 왼쪽에서 찍었을 때
         n_angle = np.abs(180 - n_angle)
 
-    # 각도 출력
-    print(n_angle)
-
     # 목 각도로 자세 판단(데이터가 쌓이기 전까지 이 방식으로 표현)
     if 80 <= n_angle <= 100:
         n_message = "올바른 자세입니다. 계속 유지하세요!!!"
@@ -86,6 +76,11 @@ def measure_angle(points):
         n_message = "턱을 앞으로 당겨주세요! 어깨와 허리건강에 좋지 않습니다."
     else:
         n_message = "턱을 뒤로 당겨주세요! 거북목의 원인이 될 수 있습니다. "
+
+    with open('./uploads/Landmark_Datas.csv', 'a', newline='') as f:
+        wr = csv.writer(f)
+        wr.writerow([wk_angle, n_angle])
+        f.close
 
     print(n_message)
     return str(wk_angle), wk_message, str(n_angle), n_message

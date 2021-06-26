@@ -1,6 +1,7 @@
 import React from "react";
 import { Button, Modal, Typography } from "antd";
 import styled from "@emotion/styled";
+import Title from "antd/lib/typography/Title";
 const { Text } = Typography;
 
 const Img = styled.img`
@@ -40,17 +41,32 @@ function ResultModal(props) {
               marginLeft: "2rem",
             }}
           >
+            <Title level={3}>측정 결과</Title>
             <p>
+              <img
+                style={{ width: "30px", height: "30px", marginRight: "10px" }}
+                src={process.env.PUBLIC_URL + "/sit.png"}
+                alt="icon"
+              />
               <Text strong>허리각도 : {props.data.wk_angle}°</Text>
             </p>
             <p>
-              <Text strong mark>{props.data.wk_message}</Text>
+              <Text strong mark>
+                {props.data.wk_message}
+              </Text>
             </p>
             <p>
+              <img
+                style={{ width: "30px", height: "30px", marginRight: "10px" }}
+                src={process.env.PUBLIC_URL + "/neck.png"}
+                alt="icon"
+              />
               <Text strong>목각도 : {props.data.n_angle}°</Text>
             </p>
             <p>
-              <Text strong mark>{props.data.n_message}</Text>
+              <Text strong mark>
+                {props.data.n_message}
+              </Text>
             </p>
           </div>
         </Container>

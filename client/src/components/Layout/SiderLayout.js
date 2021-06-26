@@ -66,8 +66,6 @@ function SiderLayout() {
               theme="dark"
               mode="inline"
               defaultSelectedKeys={["dashboard"]}
-              //selectedKeys={[location.pathname]}
-              // onClick={onMenuClicked}
             >
               <Menu.Item key="/dashboard">
                 <NavLink to="/dashboard">

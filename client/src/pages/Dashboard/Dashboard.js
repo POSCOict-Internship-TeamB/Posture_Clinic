@@ -267,7 +267,7 @@ function Dashboard() {
           </StyledCard>
         </StatisticContainer>
       </MainContainer>
-      <Row gutter={[32, 32]}>{renderCards}</Row>
+      <Row gutter={[8, 8]}>{renderCards}</Row>
       <ResultModal
         visible={visible}
         handleCancel={handleCancel}

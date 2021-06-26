@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback } from "react";
 import BaseContainer from "components/BaseComponents";
 import Webcam from "react-webcam";
-import { Button, Spin, Steps, Typography, Divider } from "antd";
+import { Button, Spin, Steps, Typography, Divider, message } from "antd";
 import axios from "axios";
 import styled from "@emotion/styled";
 import {
@@ -76,7 +76,7 @@ const steps = [
   },
 ];
 
-function Posture() {
+function MeasureImage() {
   const webcamRef = useRef(null);
   const [current, setCurrent] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -129,6 +129,9 @@ function Posture() {
         setWkMessage(response.data.wk_message);
         setNAngle(parseInt(response.data.n_angle));
         setNMessage(response.data.n_message);
+        message.success('결과 저장 성공!')
+      }else{
+        message.error('측정에 실패했습니다. 카메라에 전신이 나오도록 멀리 떨어져 주세요!')
       }
     });
   };
@@ -323,4 +326,4 @@ function Posture() {
   );
 }
 
-export default Posture;
+export default MeasureImage;

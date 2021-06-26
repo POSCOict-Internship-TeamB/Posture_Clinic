@@ -20,6 +20,12 @@ const Img = styled.img`
   height: 500px;
 `;
 
+const Container = styled.div`
+  display: flex;
+  justify-content: center;
+  margin: 2rem;
+`;
+
 const Wrapper = styled.div`
   display: flex;
   justify-content: center;
@@ -129,9 +135,11 @@ function MeasureImage() {
         setWkMessage(response.data.wk_message);
         setNAngle(parseInt(response.data.n_angle));
         setNMessage(response.data.n_message);
-        message.success('결과 저장 성공!')
-      }else{
-        message.error('측정에 실패했습니다. 카메라에 전신이 나오도록 멀리 떨어져 주세요!')
+        message.success("결과 저장 성공!");
+      } else {
+        message.error(
+          "측정에 실패했습니다. 카메라에 전신이 나오도록 멀리 떨어져 주세요!"
+        );
       }
     });
   };
@@ -229,13 +237,7 @@ function MeasureImage() {
           </Wrapper>
 
           {measuredImage && (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-around",
-                margin: "2rem",
-              }}
-            >
+            <Container>
               <Wrapper>
                 <Title>
                   <Text mark>
@@ -318,7 +320,7 @@ function MeasureImage() {
                   </div>
                 </Info>
               </InfoContainer>
-            </div>
+            </Container>
           )}
         </>
       )}

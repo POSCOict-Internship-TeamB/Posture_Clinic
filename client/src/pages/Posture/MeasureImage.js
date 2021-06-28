@@ -150,7 +150,7 @@ function MeasureImage() {
     setCurrent(0);
   };
 
-  const messageColor = (angle, part) => {
+  const messageType = (angle, part) => {
     if (part === "wk") {
       if (angle >= 95 && angle <= 125) {
         return "success";
@@ -266,14 +266,14 @@ function MeasureImage() {
                   <Title level={3}>
                     측정된 어깨와 목간의 각도는 <Text code>{nAngle}</Text>°
                     입니다. <br />
-                    <Text type={messageColor(nAngle, "n")}>
+                    <Text type={messageType(nAngle, "n")}>
                       <b>{nMessage}</b>
                     </Text>
                   </Title>
                   <Title level={3}>
                     측정된 척추와 무릎간의 각도는 <Text code>{wkAngle}</Text>
                     ° 입니다 <br />
-                    <Text type={messageColor(wkAngle, "wk")}>
+                    <Text type={messageType(wkAngle, "wk")}>
                       <b>{wkMessage}</b>
                     </Text>
                   </Title>

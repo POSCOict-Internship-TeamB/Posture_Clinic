@@ -148,8 +148,8 @@ def analyze_image():
 
     wk_angle, wk_message, n_angle, n_message = measure_angle(points)
     # DB 저장
-    # db.result.insert_one({'image_path': image_path, "wk_angle": wk_angle,
-    #                      "wk_message": wk_message,  "n_angle": n_angle, "n_message": n_message, 'time': datetime.now().replace(microsecond=0).isoformat()})
+    db.result.insert_one({'image_path': image_path, "wk_angle": wk_angle,
+                         "wk_message": wk_message,  "n_angle": n_angle, "n_message": n_message, 'time': datetime.now().replace(microsecond=0).isoformat()})
 
     return jsonify({'image_path': image_path, "wk_angle": wk_angle, "wk_message": wk_message,  "n_angle": n_angle, "n_message": n_message})
 

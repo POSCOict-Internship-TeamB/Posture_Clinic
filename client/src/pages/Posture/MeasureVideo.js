@@ -1,12 +1,14 @@
+/* eslint-disable no-lone-blocks */
 import React, { useCallback, useRef, useState } from "react";
 import BaseContainer from "components/BaseComponents";
 import Webcam from "react-webcam";
 import styled from "@emotion/styled";
-import { Button, Typography, Badge, Steps, message } from "antd";
+import { Button, Typography, Badge, Steps, message, notification } from "antd";
 import {
   VideoCameraFilled,
   LoadingOutlined,
   VideoCameraAddOutlined,
+  CheckCircleOutlined,
 } from "@ant-design/icons";
 import axios from "axios";
 const { Step } = Steps;
@@ -58,6 +60,10 @@ const steps = [
     title: <b>Analyze Video</b>,
     icon: <LoadingOutlined />,
   },
+  {
+    title: <b>Result</b>,
+    icon: <CheckCircleOutlined />,
+  },
 ];
 function MeasureWithVideo() {
   const webcamRef = useRef(null);
@@ -68,6 +74,34 @@ function MeasureWithVideo() {
     width: "800",
     height: "600",
     facingMode: "user",
+  };
+
+  const openNotificationWithIcon = (type, part, angle, message, placement) => {
+    {
+      part === "wk"
+        ? notification[type]({
+            message: (
+              <Title level={4}>
+                <Text mark>
+                  <b>측정된 허리 각도 : {angle}°</b>
+                </Text>
+              </Title>
+            ),
+            description: <b>{message}</b>,
+            placement,
+          })
+        : notification[type]({
+            message: (
+              <Title level={4}>
+                <Text mark>
+                  <b>측정된 목 각도 : {angle}°</b>
+                </Text>
+              </Title>
+            ),
+            description: <b>{message}</b>,
+            placement,
+          });
+    }
   };
 
   const dataURItoBlob = (dataURI) => {
@@ -83,11 +117,33 @@ function MeasureWithVideo() {
     return new Blob([ab], { type: mimeString });
   };
 
+  const noticeType = (angle, part) => {
+    if (part === "wk") {
+      if (angle >= 95 && angle <= 125) {
+        return "success";
+      }
+      if (angle > 125) {
+        return "warning";
+      } else {
+        return "error";
+      }
+    } else {
+      if (angle >= 80 && angle <= 100) {
+        return "success";
+      }
+      if (angle > 100) {
+        return "warning";
+      } else {
+        return "error";
+      }
+    }
+  };
+
   const record = useCallback(() => {
     setRecordState(true);
     setCurrent(1);
 
-    setInterval(() => {
+    let analyzeVideo = setInterval(() => {
       const capturedImg = webcamRef.current.getScreenshot();
       const data = new FormData();
       const file = dataURItoBlob(capturedImg);
@@ -95,9 +151,21 @@ function MeasureWithVideo() {
 
       axios.post("http://localhost:5000/api/posture", data).then((response) => {
         if (response.data) {
-          console.log(response.data);
-          message.success(response.data.wk_message);
-          message.success(response.data.n_message);
+          setCurrent(2);
+          openNotificationWithIcon(
+            noticeType(response.data.n_angle, "n"),
+            "n",
+            response.data.n_angle,
+            response.data.n_message,
+            "topLeft"
+          );
+          openNotificationWithIcon(
+            noticeType(response.data.wk_angle, "wk"),
+            "wk",
+            response.data.wk_angle,
+            response.data.wk_message,
+            "topLeft"
+          );
         } else {
           message.error(
             "측정에 실패했습니다. 카메라에 전신이 나오도록 멀리 떨어져 주세요!"
@@ -105,10 +173,18 @@ function MeasureWithVideo() {
         }
       });
     }, 5000);
+
+    setTimeout(() => {
+      clearInterval(analyzeVideo);
+      setCurrent(0);
+      message.success("측정 완료!");
+      setRecordState(false);
+    }, 19000);
   }, []);
 
   const reRecord = () => {
     setRecordState(false);
+    setCurrent(0);
   };
 
   return (

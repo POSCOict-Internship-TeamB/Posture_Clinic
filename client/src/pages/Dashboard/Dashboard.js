@@ -59,7 +59,6 @@ function Dashboard() {
     axios.get("http://localhost:5000/api/result").then((response) => {
       if (response.data) {
         setResultList(response.data);
-        console.log(response.data);
       }
     });
   }, []);
@@ -99,7 +98,6 @@ function Dashboard() {
         }
       }
     }
-    console.log(wkAngle);
 
     if (part === "wk") {
       return wkAngle / resultList.length;

@@ -19,14 +19,6 @@ const IconButton = styled(Button)`
   height: 65px;
   border-radius: 15px;
   margin: 2rem;
-  &:hover {
-    color: black;
-    border-color: black;
-  }
-  &:focus {
-    color: black;
-    border-color: black;
-  }
 `;
 
 const P = styled.p`
@@ -70,11 +62,14 @@ function index(props) {
               }
             >
               <IconButton
-                icon={<VideoCameraFilled style={{ fontSize: "35px" }} />}
+                type="danger"
+                icon={
+                  <VideoCameraFilled
+                    style={{ fontSize: "30px", marginRight: "10px" }}
+                  />
+                }
               >
-                <Text>
-                  <b>영상으로 측정하기</b>
-                </Text>
+                <b>영상으로 측정하기</b>
               </IconButton>
             </Tooltip>
           </Link>
@@ -97,10 +92,15 @@ function index(props) {
                 </>
               }
             >
-              <IconButton icon={<CameraFilled style={{ fontSize: "35px" }} />}>
-                <Text>
-                  <b>이미지로 측정하기</b>
-                </Text>
+              <IconButton
+                type="primary"
+                icon={
+                  <CameraFilled
+                    style={{ fontSize: "30px", marginRight: "10px" }}
+                  />
+                }
+              >
+                <b>이미지로 측정하기</b>
               </IconButton>
             </Tooltip>
           </Link>

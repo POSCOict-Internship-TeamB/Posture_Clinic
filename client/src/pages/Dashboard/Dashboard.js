@@ -55,6 +55,8 @@ function Dashboard() {
   const [visible, setVisible] = useState(false);
   const [result, setResult] = useState([]);
 
+  const name = localStorage.getItem("user");
+
   useEffect(() => {
     axios.get("http://localhost:5000/api/result").then((response) => {
       if (response.data) {
@@ -144,7 +146,7 @@ function Dashboard() {
             >
               <Meta
                 avatar={<Avatar icon={<UserOutlined />} />}
-                title={<b style={{ fontSize: "0.7rem" }}>name님</b>}
+                title={<b style={{ fontSize: "0.7rem" }}>{name}님</b>}
               />
             </div>,
           ]}
@@ -180,7 +182,9 @@ function Dashboard() {
     <BaseContainer>
       <MainContainer>
         <Title level={2}>
-          <b>name님의 지난 측정 결과</b>
+          <b>
+            <Text mark>{name}</Text>님의 지난 측정 결과
+          </b>
         </Title>
         <StatisticContainer>
           <StyledCard>
@@ -214,7 +218,7 @@ function Dashboard() {
                 valueStyle={{ color: "#3f8600" }}
                 prefix={
                   <img
-                    style={{ width: "40px", height: "40px" }}
+                    style={{ width: "50px", height: "50px" }}
                     src={process.env.PUBLIC_URL + "/neck.png"}
                     alt="icon"
                   />
@@ -254,7 +258,10 @@ function Dashboard() {
                 valueStyle={{ color: "#cf1322" }}
                 prefix={
                   <img
-                    style={{ width: "40px", height: "40px" }}
+                    style={{
+                      width: "50px",
+                      height: "50px",
+                    }}
                     src={process.env.PUBLIC_URL + "/sit.png"}
                     alt="icon"
                   />

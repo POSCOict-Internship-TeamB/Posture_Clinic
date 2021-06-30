@@ -7,9 +7,10 @@ import SiderLayout from "./components/Layout/SiderLayout";
 
 import Dashboard from "./pages/Dashboard/Dashboard";
 import MeasureImage from "pages/Posture/MeasureImage";
-import Login from "./pages/Login/Login";
+import Login from "./pages/User/Login";
 import index from "pages/Posture";
 import MeasureVideo from "pages/Posture/MeasureVideo";
+import Register from "pages/User/Register";
 
 const Container = styled.div`
   display: flex;
@@ -22,7 +23,7 @@ function App() {
         <SiderLayout />
         <Switch>
           <Route exact path="/" component={Login} />
-          
+          <Route exact path="/register" component={Register} />
           <Route exact path="/posture" component={index} />
           <Route exact path="/posture/image" component={MeasureImage} />
           <Route exact path="/posture/video" component={MeasureVideo} />

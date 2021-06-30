@@ -10,3 +10,7 @@ python-dotenv
 matplotlib
 pillow
 opencv-python-headless
+sklearn
+pandas
+Flask-JWT-Extended==4.2.1
+werkzeug

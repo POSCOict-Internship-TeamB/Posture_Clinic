@@ -12,12 +12,25 @@ from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 import numpy as np
 import cv2
+from werkzeug.security import *
+from flask_jwt_extended import (
+    JWTManager, jwt_required, create_access_token, get_jwt_identity, unset_jwt_cookies, create_refresh_token, set_access_cookies, set_refresh_cookies,
+)
+
+
 from image import get_image_path
 from measure import measure_angle
 
 app = Flask(__name__)
 CORS(app)
 app.config['UPLOAD_FOLDER'] = './uploads'
+
+# JWT-SECRET-KEY 설정
+app.config['SECRET_KEY'] = 'password'
+app.secret_key = '사용자 지정 비밀번호'
+jwt = JWTManager()
+jwt.init_app(app)
+
 
 # 키값 호출
 load_dotenv()
@@ -26,15 +39,6 @@ MONGO_URI = os.getenv("MONGO_URI")
 # MONGO DB
 client = MongoClient(MONGO_URI)
 db = client.get_database('data')
-
-
-# @app.route('/api', methods=['GET'])
-# @cross_origin()
-# def root():
-#     db.hits.insert_one({'time': datetime.utcnow()})
-#     response = jsonify(
-#         message='This page has been visited {} times.'.format(db.hits.count()))
-#     return response
 
 
 @app.route('/api/posture', methods=['POST'])
@@ -157,10 +161,47 @@ def analyze_image():
 @app.route('/api/result', methods=['GET'])
 def get_result():
     result = list(db.result.find())
-    user = list(db.users.find({'email': 'test@abc.com'}))
-    print(user)
-    print(len(user))
+
     return json.dumps(result, default=json_util.default)
+
+
+@app.route('/api/register', methods=["POST"])
+def register():
+    name = request.json.get("name")
+    email = request.json.get("email")
+    password = request.json.get("password")
+    age = request.json.get("age")
+    gender = request.json.get("gender")
+
+    user = list(db.users.find({'email': email}))
+
+    if (len(user) > 0):
+        return jsonify({"message": "동일한 이메일이 존재합니다"})
+
+    to_db = {"name": name, "email": email, "password": generate_password_hash(
+        password), "age": age, "gender": gender}  # 암호화
+    db.users.insert_one(to_db)
+
+    return jsonify({"email": email})
+
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    email = request.json.get("email")
+    password = request.json.get("password")
+    user = list(db.users.find({'email': email}))
+
+    if (len(user) == 0):
+        return jsonify({"message": "가입되지 않은 사용자입니다"})
+
+    access_token = create_access_token(identity=email, expires_delta=False)
+    refresh_token = create_refresh_token(identity=email)
+    response = jsonify({'login': True})
+
+    set_access_cookies(response, access_token)
+    set_refresh_cookies(response, refresh_token)
+    # return jsonify({"access_token": access_token, "refresh_token": refresh_token})
+    return json.dumps(user, default=json_util.default)
 
 
 if __name__ == '__main__':

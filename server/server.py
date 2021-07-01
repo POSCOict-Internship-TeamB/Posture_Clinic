@@ -20,6 +20,7 @@ from flask_jwt_extended import (
 
 from image import get_image_path
 from measure import measure_angle
+from analyze import analyze_data
 
 app = Flask(__name__)
 CORS(app)
@@ -160,9 +161,15 @@ def analyze_image():
 
 @app.route('/api/result', methods=['GET'])
 def get_result():
-    result = list(db.result.find())
+    result = list(db.result.find().sort('time', -1))
 
     return json.dumps(result, default=json_util.default)
+
+
+@app.route('/api/analyze', methods=['GET'])
+def get_analyzed_data():
+    neck_result, wk_result = analyze_data()
+    return jsonify({"neck_result": neck_result, "wk_result": wk_result})
 
 
 @app.route('/api/register', methods=["POST"])

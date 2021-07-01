@@ -33,6 +33,16 @@ function Login(props) {
     setPassword(event.currentTarget.value);
   };
 
+  // const data = () => {
+  //   Axios.get("http://localhost:5000/api/analyze").then((response) => {
+  //     if (response.data) {
+  //       console.log(response.data);
+  //     } else {
+  //       message.error("로그인 실패");
+  //     }
+  //   });
+  // };
+
   const onSubmitHandler = (event) => {
     event.preventDefault();
 
@@ -44,7 +54,10 @@ function Login(props) {
       if (response.data) {
         message.success("로그인 성공!");
         props.history.push("/posture");
+        console.log(response.data);
         window.localStorage.setItem("user", response.data[0].name);
+        window.localStorage.setItem("age", response.data[0].age);
+        window.localStorage.setItem("gender", response.data[0].gender);
         window.localStorage.setItem("access_token", response.data.access_token);
         window.localStorage.setItem(
           "refresh_token",

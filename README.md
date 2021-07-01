@@ -1,11 +1,16 @@
 # **Welcome to Posture-Clinic👩‍💻**
 
-AI 기반 모션인식을 통한 자세교정 솔루션 **Posture-Clinic** 입니다
+### AI 기반 모션인식을 통한 자세교정 솔루션 **Posture-Clinic** 입니다
 
 # **Preview**
 
-![preview](client/public/preview1.gif)
-![preview](client/public/preview2.gif)
+## **Image**
+
+![preview](client/public/gifimage.gif)
+
+## **Video**
+
+![preview](client/public/gifvideo.gif)
 
 # **How to start**
 

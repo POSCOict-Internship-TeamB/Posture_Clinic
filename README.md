@@ -2,15 +2,26 @@
 
 ### AI 기반 모션인식을 통한 자세교정 솔루션 **Posture-Clinic** 입니다
 
-# **Preview**
+# **Background & Concept**
 
-## **Image**
 
-![preview](client/public/gifimage.gif)
+COVID-19의 발발로 **Untact**는 폭발적으로 증가하고 외부 활동과 움직임은 최소화됐습니다. 사용자의 앉은 자세를 측정하여 자세 개선 솔루션을 제공합니다.
 
-## **Video**
+📌Problem 01. 비대면 교육 환경
 
-![preview](client/public/gifvideo.gif)
+☑️ 청소년기는 평생의 자세가 형성되는 중요한 시기입니다. COVID-19로 인한 온라인 교육 환경은 청소년들에게 척추측만증을 안겨줄 수 있습니다.
+
+📌Problem 02. 움직임 감소로 인한 건강 적신호
+
+☑️ 외부활동을 자제하고 집에서 지내는 시간이 늘어나면서 미디어를 보는 시간이 늘어났고, 움직임임은 현저히 줄어들었습니다. 
+
+📌Problem 03. 생활 습관 개선의 필요성
+
+☑️ 올바르지 않은 자세로 생활하다보면 몸이 그대로 굳어 건강에 이상이 생깁니다. 우리는 바른 자세를 유지함으로써 관리를 해야 합니다. 
+
+# **Product Detail**
+![productdetail](client/public/productdetail.png)
+
 
 # **How to start**
 
@@ -62,6 +73,17 @@
 
     <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white">
     <img src="https://img.shields.io/badge/Slack-4A154B?style=for-the-badge&logo=slack&logoColor=white">
+
+# **Demo**
+
+## **Image**
+
+![preview](client/public/gifimage.gif)
+
+## **Video**
+
+![preview](client/public/gifvideo.gif)
+
 
 ### Directory
 

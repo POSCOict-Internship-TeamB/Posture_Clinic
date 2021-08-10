@@ -46,7 +46,7 @@ db = client.get_database('data')
 def analyze_image():
     # 이미지 파일 저장
     image_file = request.files['file']
-    filename = secure_filename(image_file.filename)
+    filename = secure_filename(image_file.filename) 
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     image_file.save(filepath)
 
